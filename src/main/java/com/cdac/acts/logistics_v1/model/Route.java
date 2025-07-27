@@ -21,8 +21,8 @@ public class Route {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String fromCity;
-    private String toCity;
+    private String origin;
+    private String destination;
     private Double distanceKm;
     private Double averageTravelTime;
     private BigDecimal tollCost;
