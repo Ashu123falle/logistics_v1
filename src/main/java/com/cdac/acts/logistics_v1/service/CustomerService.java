@@ -1,13 +1,18 @@
 package com.cdac.acts.logistics_v1.service;
 
-import com.cdac.acts.logistics_v1.dto.CustomerDTO;
-import com.cdac.acts.logistics_v1.model.Customer;
 import java.util.List;
 
+import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
+import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
+import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
+
 public interface CustomerService {
-    CustomerDTO addCustomer(CustomerDTO customer);
-    CustomerDTO getCustomerById(Long id);
-    List<CustomerDTO> getAllCustomers();
-    CustomerDTO updateCustomer(Long id, CustomerDTO updatedCustomer);
+    CustomerResponseDTO createCustomer(CustomerRequestDTO request);
+    CustomerResponseDTO getCustomerById(Long id);
+    List<CustomerResponseDTO> getAllCustomers();
+    CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO request);
     void deleteCustomer(Long id);
+
+    // Extra
+    List<ShipmentResponseDTO> getCustomerShipments(Long customerId);
 }

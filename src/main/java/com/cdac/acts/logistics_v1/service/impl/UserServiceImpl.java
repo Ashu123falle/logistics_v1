@@ -1,91 +1,106 @@
 package com.cdac.acts.logistics_v1.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cdac.acts.logistics_v1.dto.UserDTO;
+import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
+import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
 import com.cdac.acts.logistics_v1.model.User;
 import com.cdac.acts.logistics_v1.repository.UserRepository;
 import com.cdac.acts.logistics_v1.service.UserService;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
-	@Autowired
-	private UserRepository userRepository;
-	
-	
-	@Override
-	public UserDTO createUser(UserDTO user) {
+    @Autowired
+    private UserRepository userRepository;
 
-		User newUser = new User();
-		BeanUtils.copyProperties(user, newUser);
-		try {
-			userRepository.save(newUser);
-		} catch (Exception e) {
-			// Handle the exception, e.g., log it or rethrow it
-			return null;
-		}
-		
-		return user;
-	}
+    private UserResponseDTO mapToResponseDTO(User user) {
+        return UserResponseDTO.builder()
+                .userId(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .role(user.getRole())
+                .status(user.getStatus())
+                .build();
+    }
 
-	@Override
-	public UserDTO getUserById(Long id) {
-		User user = userRepository.findById(id).orElse(null);
-		if (user != null) {
-			UserDTO userDTO = new UserDTO();
-			BeanUtils.copyProperties(user, userDTO);
-			return userDTO;
-		}
-		return null; // or throw an exception if user not found
-	}
+    private User mapToEntity(UserRequestDTO dto) {
+        return User.builder()
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .username(dto.getUsername())
+                .password(dto.getPassword())
+                .email(dto.getEmail())
+                .phoneNumber(dto.getPhoneNumber())
+                .role(dto.getRole())
+                .status(dto.getStatus())
+                .build();
+    }
 
-	@Override
-	public List<UserDTO> getAllUsers() {
-		List<User> users = userRepository.findAll();
-		List<UserDTO> userDTOs = new ArrayList<>();
-		for (User user : users) {
-			UserDTO userDTO = new UserDTO();
-			BeanUtils.copyProperties(user, userDTO);
-			userDTOs.add(userDTO);
-		}
-		return userDTOs;
-	}
 
-	@Override
-	public UserDTO updateUser(Long id, UserDTO updatedUser) {
-		User existingUser = userRepository.findById(id).orElse(null);
-		if (existingUser != null) {
-			BeanUtils.copyProperties(updatedUser, existingUser, "id"); // Exclude id from copy
-			try {
-				userRepository.save(existingUser);
-				return updatedUser;
-			} catch (Exception e) {
-				// Handle the exception, e.g., log it or rethrow it
-				return null;
-			}
-		}
-		return null; // or throw an exception if user not found
-	}
+    @Override
+    public UserResponseDTO createUser(UserRequestDTO request) {
+        User user = mapToEntity(request);
+        user = userRepository.save(user);
+        return mapToResponseDTO(user);
+    }
 
-	@Override
-	public void deleteUser(Long id) {
-		if (userRepository.existsById(id)) {		
-			try {        	
-				userRepository.deleteById(id); 
-			} catch (Exception e) {
-				// Handle the exception, e.g., log it or rethrow it
-			}         
-		} else {            
-			// Handle the case where the user does not exist, e.g., throw an exception or return a specific response
-		}
-		
-	}
-	
+    @Override
+    public UserResponseDTO getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        return mapToResponseDTO(user);
+    }
+
+    @Override
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserResponseDTO updateUser(Long id, UserRequestDTO request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+        user.setName(request.getName());
+        user.setUsername(request.getUsername());
+        user.setPassword(request.getPassword());
+        user.setEmail(request.getEmail());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setRole(request.getRole());
+        user.setStatus(request.getStatus());
+
+        return mapToResponseDTO(userRepository.save(user));
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public List<UserResponseDTO> findUsersByRole(String role) {
+        return userRepository.findByRole(role).stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserResponseDTO authenticate(String username, String password) {
+        Optional<User> optionalUser = userRepository.findByUsernameAndPassword(username, password);
+        return optionalUser.map(this::mapToResponseDTO)
+                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+    }
+}
 
 }

@@ -1,100 +1,142 @@
 package com.cdac.acts.logistics_v1.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
+import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
+import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
+import com.cdac.acts.logistics_v1.model.Customer;
+import com.cdac.acts.logistics_v1.model.Role;
+import com.cdac.acts.logistics_v1.model.Shipment;
+import com.cdac.acts.logistics_v1.model.UserStatus;
+import com.cdac.acts.logistics_v1.repository.CustomerRepository;
+import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
+import com.cdac.acts.logistics_v1.service.CustomerService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import com.cdac.acts.logistics_v1.dto.CustomerDTO;
-import com.cdac.acts.logistics_v1.model.Customer;
-import com.cdac.acts.logistics_v1.model.User;
-import com.cdac.acts.logistics_v1.repository.CustomerRepository;
-import com.cdac.acts.logistics_v1.service.CustomerService;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
-	
-	@Autowired
-	CustomerRepository customerRepository;
 
-	@Override
-	public CustomerDTO addCustomer(CustomerDTO customerDTO) {
-		Customer customer = new Customer();
-		BeanUtils.copyProperties(customerDTO, customer);
-		try{
-			customerRepository.save(customer);
-		}catch(Exception e) {
-			// Handle the exception, e.g., log it or rethrow it
-			return null;
-		}
-		return customerDTO;
-	}
+    private final CustomerRepository customerRepository;
+    private final ShipmentRepository shipmentRepository;
 
-	@Override
-	public CustomerDTO updateCustomer(Long id, CustomerDTO customerDTO) {
-		Customer customer = new Customer();
-		if(customerRepository.existsById(id)) {
-			User user = new User();
-			BeanUtils.copyProperties(customerDTO, user);
-			try{
-				customerRepository.save(customer);
-				return customerDTO;
-			}catch(Exception e) {
-				// Handle the exception, e.g., log it or rethrow it
-				return null;
-			}
-		}
-		// If the customer does not exist, return null or throw an exception
-		return null;
-	}
+    @Override
+    public CustomerResponseDTO createCustomer(CustomerRequestDTO request) {
+        Customer customer = Customer.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(request.getPassword()) // You can encode password if using Spring Security
+                .phoneNumber(request.getPhoneNumber())
+                .role(Role.CUSTOMER)
+                .status(UserStatus.ACTIVE)
+                .onboardingDate(LocalDateTime.now())
+                .kycStatus("PENDING")
+                .companyName(request.getCompanyName())
+                .gstNumber(request.getGstNumber())
+                .panNumber(request.getPanNumber())
+                .industryType(request.getIndustryType())
+                .companyAddress(request.getCompanyAddress())
+                .companyWebsite(request.getCompanyWebsite())
+                .contactPersonName(request.getContactPersonName())
+                .contactPersonPhone(request.getContactPersonPhone())
+                .companyEmail(request.getCompanyEmail())
+                .build();
 
-	@Override
-	public void deleteCustomer(Long id) {
-		if (customerRepository.existsById(id)) {		
-            try {        	
-            	customerRepository.deleteById(id); 
-                 
-            } catch (Exception e) {
-                // Handle the exception, e.g., log it or rethrow it
-            }         
-        }
-		else {            
-			//throw ecxception or return a specific response
-		}
-	}
+        Customer saved = customerRepository.save(customer);
+        return mapToDTO(saved);
+    }
 
-	@Override
-	public CustomerDTO getCustomerById(Long id) {
-		
-//		return customerRepository.findById(id).isEmpty() ? false : true;
-		Customer customer = customerRepository.findById(id).orElse(null);
-		if (customer != null) {
-			CustomerDTO customerDTO = new CustomerDTO();
-			BeanUtils.copyProperties(customer, customerDTO);
-			return customerDTO;
-		}
-		return null; // or throw an exception if preferred
-	}
+    @Override
+    public CustomerResponseDTO getCustomerById(Long id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
+        return mapToDTO(customer);
+    }
 
-//	@Override
-//	public List<Customer> getAllCustomers(int pageNo, int pageSize) {
-//		Pageable page = PageRequest.of(pageNo, pageSize);
-//		return customerRepository.findAll(page).toList();
-//	}
+    @Override
+    public List<CustomerResponseDTO> getAllCustomers() {
+        return customerRepository.findAll()
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
 
-	@Override
-	public List<CustomerDTO> getAllCustomers() {
-		List<Customer> customers = customerRepository.findAll();
-		List<CustomerDTO> customerDTOs = new ArrayList<>();
-		for (Customer customer : customers) {
-			CustomerDTO customerDTO = new CustomerDTO();
-			BeanUtils.copyProperties(customer, customerDTO);
-			customerDTOs.add(customerDTO);
-		}
-		return customerDTOs;
-	}
-	
+    @Override
+    public CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO request) {
+        Customer existing = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
 
+        existing.setFirstName(request.getFirstName());
+        existing.setLastName(request.getLastName());
+        existing.setEmail(request.getEmail());
+        existing.setPhoneNumber(request.getPhoneNumber());
+
+        existing.setCompanyName(request.getCompanyName());
+        existing.setGstNumber(request.getGstNumber());
+        existing.setPanNumber(request.getPanNumber());
+        existing.setIndustryType(request.getIndustryType());
+        existing.setCompanyAddress(request.getCompanyAddress());
+        existing.setCompanyWebsite(request.getCompanyWebsite());
+        existing.setContactPersonName(request.getContactPersonName());
+        existing.setContactPersonPhone(request.getContactPersonPhone());
+        existing.setCompanyEmail(request.getCompanyEmail());
+
+        Customer updated = customerRepository.save(existing);
+        return mapToDTO(updated);
+    }
+
+    @Override
+    public void deleteCustomer(Long id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
+        customerRepository.delete(customer);
+    }
+
+    @Override
+    public List<ShipmentResponseDTO> getCustomerShipments(Long customerId) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        List<Shipment> shipments = shipmentRepository.findByCustomer(customer);
+
+        return shipments.stream().map(shipment -> ShipmentResponseDTO.builder()
+                .id(shipment.getId())
+                .trackingNumber(shipment.getTrackingNumber())
+                .status(shipment.getStatus())
+                .origin(shipment.getOrigin())
+                .destination(shipment.getDestination())
+                .createdAt(shipment.getCreatedAt())
+                .updatedAt(shipment.getUpdatedAt())
+                .build()
+        ).collect(Collectors.toList());
+    }
+
+    private CustomerResponseDTO mapToDTO(Customer customer) {
+        return CustomerResponseDTO.builder()
+                .id(customer.getId())
+                .firstName(customer.getFirstName())
+                .lastName(customer.getLastName())
+                .username(customer.getUsername())
+                .email(customer.getEmail())
+                .phoneNumber(customer.getPhoneNumber())
+                .role(customer.getRole())
+                .status(customer.getStatus())
+                .companyName(customer.getCompanyName())
+                .gstNumber(customer.getGstNumber())
+                .panNumber(customer.getPanNumber())
+                .industryType(customer.getIndustryType())
+                .companyAddress(customer.getCompanyAddress())
+                .companyWebsite(customer.getCompanyWebsite())
+                .contactPersonName(customer.getContactPersonName())
+                .contactPersonPhone(customer.getContactPersonPhone())
+                .companyEmail(customer.getCompanyEmail())
+                .build();
+    }
 }

@@ -1,13 +1,18 @@
 package com.cdac.acts.logistics_v1.service;
 
-import com.cdac.acts.logistics_v1.dto.DeliveryOrderDTO;
-import com.cdac.acts.logistics_v1.model.DeliveryOrder;
 import java.util.List;
 
+import com.cdac.acts.logistics_v1.dto.DeliveryOrderRequestDTO;
+import com.cdac.acts.logistics_v1.dto.DeliveryOrderResponseDTO;
+
 public interface DeliveryOrderService {
-    DeliveryOrderDTO createOrder(DeliveryOrderDTO order);
-    DeliveryOrderDTO getOrderById(Long id);
-    List<DeliveryOrderDTO> getAllOrders();
-    DeliveryOrderDTO updateOrder(Long id, DeliveryOrderDTO updatedOrder);
+    DeliveryOrderResponseDTO createOrder(DeliveryOrderRequestDTO request);
+    DeliveryOrderResponseDTO getOrderById(Long id);
+    List<DeliveryOrderResponseDTO> getAllOrders();
+    DeliveryOrderResponseDTO updateOrder(Long id, DeliveryOrderRequestDTO request);
     void deleteOrder(Long id);
+
+    // Extra
+    List<DeliveryOrderResponseDTO> getOrdersByShipmentId(Long shipmentId);
+    List<DeliveryOrderResponseDTO> getOrdersByDriverId(Long driverId);
 }
