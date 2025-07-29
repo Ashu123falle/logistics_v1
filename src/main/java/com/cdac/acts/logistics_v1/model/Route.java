@@ -1,11 +1,12 @@
 package com.cdac.acts.logistics_v1.model;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,9 +22,24 @@ public class Route {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String fromCity;
-    private String toCity;
-    private Double distanceKm;
-    private Double averageTravelTime;
-    private BigDecimal tollCost;
+    private String sourceAddress;
+    private Double sourceLatitude;
+    private Double sourceLongitude;
+
+    private String destinationAddress;
+    private Double destinationLatitude;
+    private Double destinationLongitude;
+
+    private Double distance;
+    private Double duration;
+
+    @Lob
+    private String geometry;
+
+    @Lob
+    private String instructions;
+
+    private String travelMode;
+    private Boolean isActive;
+    private LocalDateTime createdAt;
 }

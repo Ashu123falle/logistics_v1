@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,16 +18,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TrackingEvent {
+public class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String fileName;
+    private String fileType;
+    private String fileUrl;
+
     @ManyToOne
+    @JoinColumn(name = "delivery_order_id")
     private DeliveryOrder deliveryOrder;
 
-    private LocalDateTime timestamp;
-    private String location;
-    private String statusUpdate; // "Arrived at hub", "Delivered", etc.
-    private String remarks;
+    private LocalDateTime uploadedAt;
 }

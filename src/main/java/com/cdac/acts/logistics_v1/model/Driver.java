@@ -1,10 +1,10 @@
 package com.cdac.acts.logistics_v1.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,18 +15,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Driver {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@PrimaryKeyJoinColumn(name = "user_id")
+public class Driver extends User {
 
-    private String name;
+    @Column(unique = true, nullable = false)
     private String licenseNumber;
-    private String phone;
 
-    @OneToOne
-    private Vehicle assignedVehicle;
-
-    private String status; // Available, On Delivery, Off Duty
+    @ManyToOne
+    @JoinColumn(name = "vehicle_id")
+    private Vehicle currentVehicle;
 }
 

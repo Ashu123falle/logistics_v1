@@ -1,12 +1,13 @@
 package com.cdac.acts.logistics_v1.model;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,18 +18,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Vehicle {
+public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String registrationNumber;
-    private String model;
-    private String type;
-    private Double capacity;
+    private String message;
+    private Boolean isRead;
+    private LocalDateTime sentAt;
 
-    private Boolean isAvailable;
-
-    @OneToMany(mappedBy = "currentVehicle")
-    private List<Driver> assignedDrivers;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User recipient;
 }

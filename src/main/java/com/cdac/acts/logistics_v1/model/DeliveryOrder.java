@@ -1,13 +1,17 @@
 package com.cdac.acts.logistics_v1.model;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import com.cdac.acts.logistics_v1.enums.DeliveryStatus;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,25 +27,26 @@ public class DeliveryOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private Customer customer;
-
-    @ManyToOne
+    @OneToOne
+    @JoinColumn(name = "shipment_id")
     private Shipment shipment;
 
-    private String pickupLocation;
-    private String deliveryLocation;
-    private LocalDate scheduledPickupDate;
-    private LocalDate scheduledDeliveryDate;
+    @OneToOne
+    @JoinColumn(name = "route_id")
+    private Route route;
 
-    private String deliveryStatus; // Pending, In Transit, Delivered, Cancelled
-
-    @ManyToOne
-    private Vehicle assignedVehicle;
-
-    @ManyToOne
+    @OneToOne
+    @JoinColumn(name = "driver_id")
     private Driver assignedDriver;
 
-    private BigDecimal deliveryCost;
-    private String trackingNumber;
+    private Double cost;
+
+    private LocalDateTime scheduledPickupDate;
+    private LocalDateTime scheduledDeliveryDate;
+
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus status;
+
+    private String notes;
+    private LocalDateTime createdAt;
 }
