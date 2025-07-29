@@ -1,12 +1,18 @@
 package com.cdac.acts.logistics_v1.service;
 
-import com.cdac.acts.logistics_v1.model.Route;
 import java.util.List;
 
+import com.cdac.acts.logistics_v1.dto.RouteRequestDTO;
+import com.cdac.acts.logistics_v1.dto.RouteResponseDTO;
+
 public interface RouteService {
-    Route addRoute(Route route);
-    Route getRouteById(Long id);
-    List<Route> getAllRoutes();
-    Route updateRoute(Long id, Route updatedRoute);
+    RouteResponseDTO createRoute(RouteRequestDTO request);
+    RouteResponseDTO getRouteById(Long id);
+    List<RouteResponseDTO> getAllRoutes();
+    RouteResponseDTO updateRoute(Long id, RouteRequestDTO request);
     void deleteRoute(Long id);
+
+    // Extra
+    RouteResponseDTO fetchAndSaveRouteDetails(String srcLat, String srcLng, String dstLat, String dstLng);
 }
+

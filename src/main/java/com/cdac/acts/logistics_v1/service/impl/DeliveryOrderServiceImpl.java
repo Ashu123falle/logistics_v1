@@ -1,94 +1,136 @@
 package com.cdac.acts.logistics_v1.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 
-import org.springframework.beans.BeanUtils;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cdac.acts.logistics_v1.dto.DeliveryOrderDTO;
+import com.cdac.acts.logistics_v1.dto.DeliveryOrderRequestDTO;
+import com.cdac.acts.logistics_v1.dto.DeliveryOrderResponseDTO;
+import com.cdac.acts.logistics_v1.enums.DeliveryStatus;
+import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
 import com.cdac.acts.logistics_v1.model.DeliveryOrder;
+import com.cdac.acts.logistics_v1.model.Driver;
+import com.cdac.acts.logistics_v1.model.Route;
+import com.cdac.acts.logistics_v1.model.Shipment;
 import com.cdac.acts.logistics_v1.repository.DeliveryOrderRepository;
+import com.cdac.acts.logistics_v1.repository.DriverRepository;
+import com.cdac.acts.logistics_v1.repository.RouteRepository;
+import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
 import com.cdac.acts.logistics_v1.service.DeliveryOrderService;
 
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class DeliveryOrderServiceImpl implements DeliveryOrderService {
-	
-	
+
 	@Autowired
-	private DeliveryOrderRepository deliveryOrderRepository;
+    private DeliveryOrderRepository deliveryOrderRepository;
+	@Autowired
+    private ShipmentRepository shipmentRepository;
+	@Autowired
+    private RouteRepository routeRepository;
+	@Autowired
+    private DriverRepository driverRepository;
 
-	@Override
-	public DeliveryOrderDTO createOrder(DeliveryOrderDTO order) {
-		DeliveryOrder newOrder = new DeliveryOrder();
-		BeanUtils.copyProperties(order, newOrder);
-		try {
-			deliveryOrderRepository.save(newOrder);
-			return order; // Return the original DTO or convert it back to DTO if needed
-		} catch (Exception e) {
-			// Handle the exception, e.g., log it or rethrow it
-			return null;
-		}
-	}
+    @Override
+    public DeliveryOrderResponseDTO createOrder(DeliveryOrderRequestDTO request) {
+        Shipment shipment = shipmentRepository.findById(request.getShipmentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found with id: " + request.getShipmentId()));
 
-	@Override
-	public DeliveryOrderDTO getOrderById(Long id) {
-		
-		DeliveryOrder order = deliveryOrderRepository.findById(id).orElse(null);
-		if (order != null) {
-			DeliveryOrderDTO orderDTO = new DeliveryOrderDTO();
-			BeanUtils.copyProperties(order, orderDTO);
-			return orderDTO;
-		}
-		return null; // or throw an exception if not found
-		
-	}
+        Route route = routeRepository.findById(request.getRouteId())
+                .orElseThrow(() -> new ResourceNotFoundException("Route not found with id: " + request.getRouteId()));
 
-	@Override
-	public List<DeliveryOrderDTO> getAllOrders() {
-		List<DeliveryOrder> orders = deliveryOrderRepository.findAll();
-		List<DeliveryOrderDTO> orderDTOs = new ArrayList<>();
-		for (DeliveryOrder order : orders) {
-			DeliveryOrderDTO orderDTO = new DeliveryOrderDTO();
-			BeanUtils.copyProperties(order, orderDTO);
-			orderDTOs.add(orderDTO);
-		}
-		return orderDTOs; // Return the list of DTOs
-	}
+        Driver driver = driverRepository.findById(request.getDriverId())
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + request.getDriverId()));
 
-	@Override
-	public DeliveryOrderDTO updateOrder(Long id, DeliveryOrderDTO updatedOrder) {
-		DeliveryOrder existingOrder = deliveryOrderRepository.findById(id).orElse(null);
-		if (existingOrder != null) {
-			BeanUtils.copyProperties(updatedOrder, existingOrder, "id"); // Exclude id from copy
-			try {
-				deliveryOrderRepository.save(existingOrder);
-				return updatedOrder; // Return the updated DTO or convert it back to DTO if needed
-			} catch (Exception e) {
-				// Handle the exception, e.g., log it or rethrow it
-				return null;
-			}
-		}
-		return null; // or throw an exception if not found
-	}
+        DeliveryOrder order = DeliveryOrder.builder()
+                .shipment(shipment)
+                .route(route)
+                .assignedDriver(driver)
+                .cost(request.getCost())
+                .status(DeliveryStatus.valueOf(request.getStatus()))
+                .createdAt(LocalDateTime.now())
+                .build();
 
-	@Override
-	public void deleteOrder(Long id) {
-		if (!deliveryOrderRepository.existsById(id)) {
-			// Handle the case where the order does not exist
-			// You might want to throw an exception here
-			return;
-		}
-		try {
-			deliveryOrderRepository.deleteById(id);
-		} catch (Exception e) {
-			// Handle the exception, e.g., log it or rethrow it
-			// You might want to throw a custom exception here
-		}
-		
-	}
+        DeliveryOrder saved = deliveryOrderRepository.save(order);
+        return mapToResponse(saved);
+    }
 
-	
+    @Override
+    public DeliveryOrderResponseDTO getOrderById(Long id) {
+        DeliveryOrder order = deliveryOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+        return mapToResponse(order);
+    }
+
+    @Override
+    public List<DeliveryOrderResponseDTO> getAllOrders() {
+        return deliveryOrderRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public DeliveryOrderResponseDTO updateOrder(Long id, DeliveryOrderRequestDTO request) {
+        DeliveryOrder order = deliveryOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+
+        Shipment shipment = shipmentRepository.findById(request.getShipmentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found with id: " + request.getShipmentId()));
+
+        Route route = routeRepository.findById(request.getRouteId())
+                .orElseThrow(() -> new ResourceNotFoundException("Route not found with id: " + request.getRouteId()));
+
+        Driver driver = driverRepository.findById(request.getDriverId())
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + request.getDriverId()));
+
+        order.setShipment(shipment);
+        order.setRoute(route);
+        order.setAssignedDriver(driver);
+        order.setCost(request.getCost());
+        order.setStatus(DeliveryStatus.valueOf(request.getStatus()));
+
+        DeliveryOrder updated = deliveryOrderRepository.save(order);
+        return mapToResponse(updated);
+    }
+
+    @Override
+    public void deleteOrder(Long id) {
+        DeliveryOrder order = deliveryOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+        deliveryOrderRepository.delete(order);
+    }
+
+    @Override
+    public List<DeliveryOrderResponseDTO> getOrdersByShipmentId(Long shipmentId) {
+        return deliveryOrderRepository.findByShipmentId(shipmentId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DeliveryOrderResponseDTO> getOrdersByDriverId(Long driverId) {
+        return deliveryOrderRepository.findByAssignedDriverId(driverId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    // Mapping method (can extract into a mapper class if needed)
+    private DeliveryOrderResponseDTO mapToResponse(DeliveryOrder order) {
+        return new DeliveryOrderResponseDTO(
+                order.getId(),
+                order.getShipment().getId(),
+                order.getRoute().getId(),
+                order.getAssignedDriver().getId(),
+                order.getCost(),
+                order.getStatus().name()
+        );
+    }
 }

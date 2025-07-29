@@ -1,11 +1,10 @@
 package com.cdac.acts.logistics_v1.service;
 
-import com.cdac.acts.logistics_v1.model.TrackingEvent;
-import java.util.List;
+import com.cdac.acts.logistics_v1.dto.DriverLocationRequestDTO;
+import com.cdac.acts.logistics_v1.dto.DriverLocationResponseDTO;
 
-public interface TrackingEventService {
-    TrackingEvent addEvent(TrackingEvent event);
-    TrackingEvent getEventById(Long id);
-    List<TrackingEvent> getAllEvents();
-    List<TrackingEvent> getEventsByShipmentId(Long shipmentId);
+public interface DriverLocationService {
+    DriverLocationResponseDTO updateLocation(Long driverId, DriverLocationRequestDTO request);
+    DriverLocationResponseDTO getCurrentLocation(Long driverId);
 }
+

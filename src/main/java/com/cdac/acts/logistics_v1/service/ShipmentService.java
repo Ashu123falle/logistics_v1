@@ -1,12 +1,18 @@
 package com.cdac.acts.logistics_v1.service;
 
-import com.cdac.acts.logistics_v1.model.Shipment;
 import java.util.List;
 
+import com.cdac.acts.logistics_v1.dto.ShipmentRequestDTO;
+import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
+
 public interface ShipmentService {
-    Shipment createShipment(Shipment shipment);
-    Shipment getShipmentById(Long id);
-    List<Shipment> getAllShipments();
-    Shipment updateShipment(Long id, Shipment updatedShipment);
+    ShipmentResponseDTO createShipment(ShipmentRequestDTO request);
+    ShipmentResponseDTO getShipmentById(Long id);
+    List<ShipmentResponseDTO> getAllShipments();
+    ShipmentResponseDTO updateShipment(Long id, ShipmentRequestDTO request);
     void deleteShipment(Long id);
+
+    // Extra
+    List<ShipmentResponseDTO> getShipmentsByType(String type);
 }
+

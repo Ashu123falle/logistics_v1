@@ -1,12 +1,18 @@
 package com.cdac.acts.logistics_v1.service;
 
-import com.cdac.acts.logistics_v1.model.Vehicle;
 import java.util.List;
 
+import com.cdac.acts.logistics_v1.dto.VehicleRequestDTO;
+import com.cdac.acts.logistics_v1.dto.VehicleResponseDTO;
+
 public interface VehicleService {
-    Vehicle addVehicle(Vehicle vehicle);
-    Vehicle getVehicleById(Long id);
-    List<Vehicle> getAllVehicles();
-    Vehicle updateVehicle(Long id, Vehicle updatedVehicle);
+    VehicleResponseDTO createVehicle(VehicleRequestDTO request);
+    VehicleResponseDTO getVehicleById(Long id);
+    List<VehicleResponseDTO> getAllVehicles();
+    VehicleResponseDTO updateVehicle(Long id, VehicleRequestDTO request);
     void deleteVehicle(Long id);
+
+    // Extra
+    List<VehicleResponseDTO> findAvailableVehicles();
 }
+
