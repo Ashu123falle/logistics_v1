@@ -1,18 +1,18 @@
 package com.cdac.acts.logistics_v1.dto;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class CustomerResponseDTO extends UserResponseDTO {
     private String companyName;
     private String gstNumber;
     private String panNumber;
     private String industryType;
     private String companyAddress;
-    private String companyWebsite;
 
     private String contactPersonName;
     private String contactPersonPhone;

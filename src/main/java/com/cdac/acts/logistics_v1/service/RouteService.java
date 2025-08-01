@@ -13,6 +13,6 @@ public interface RouteService {
     void deleteRoute(Long id);
 
     // Extra
-    RouteResponseDTO fetchAndSaveRouteDetails(String srcLat, String srcLng, String dstLat, String dstLng);
+    RouteResponseDTO fetchAndSaveRouteDetails(Double srcLat, Double srcLng, Double dstLat, Double dstLng);
 }
 

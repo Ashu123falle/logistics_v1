@@ -9,18 +9,19 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Driver extends User {
 
     @Column(unique = true, nullable = false)
     private String licenseNumber;
-
+    
     @ManyToOne
     @JoinColumn(name = "vehicle_id")
     private Vehicle currentVehicle;
