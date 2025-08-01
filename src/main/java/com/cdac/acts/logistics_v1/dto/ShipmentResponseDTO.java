@@ -6,14 +6,15 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ShipmentResponseDTO {
-    private Long id;
-    private String shipmentId;
-    private Long customerId;
-    private Long sourceAddressId;
-    private Long destinationAddressId;
-    private String contentDescription;
-    private Double weight;
-    private String status;
+	private long id;
+	private String type;
+	private String name;
+	private String description;
+	private Double value;
+	private String dimensions;
+	private Double weight;;
+	private long customerId;
 
 }

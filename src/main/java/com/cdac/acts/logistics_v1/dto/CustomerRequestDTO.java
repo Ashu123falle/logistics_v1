@@ -1,18 +1,22 @@
 package com.cdac.acts.logistics_v1.dto;
 
-import lombok.*;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
+
 public class CustomerRequestDTO extends UserRequestDTO {
     private String companyName;
     private String gstNumber;
     private String panNumber;
     private String industryType;
     private String companyAddress;
-    private String companyWebsite;
 
     private String contactPersonName;
     private String contactPersonPhone;

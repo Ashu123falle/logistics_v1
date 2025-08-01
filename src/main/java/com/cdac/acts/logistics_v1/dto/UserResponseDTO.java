@@ -3,11 +3,13 @@ package com.cdac.acts.logistics_v1.dto;
 import com.cdac.acts.logistics_v1.enums.Role;
 import com.cdac.acts.logistics_v1.enums.UserStatus;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class UserResponseDTO {
     private Long userId;
     private String firstName;

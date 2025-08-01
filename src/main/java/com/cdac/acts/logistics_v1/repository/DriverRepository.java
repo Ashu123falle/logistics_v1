@@ -9,7 +9,7 @@ import com.cdac.acts.logistics_v1.model.Driver;
 
 public interface DriverRepository extends JpaRepository< Driver , Long>{
 
-	 // Get all delivery orders linked to a specific shipment
+
     List<DeliveryOrder> findByShipmentId(Long shipmentId);
 
     // Get all delivery orders assigned to a specific driver

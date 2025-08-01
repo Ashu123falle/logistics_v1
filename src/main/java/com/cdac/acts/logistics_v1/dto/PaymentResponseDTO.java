@@ -1,6 +1,8 @@
 package com.cdac.acts.logistics_v1.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -10,7 +12,8 @@ public class PaymentResponseDTO {
     private Long customerId;
     private Long deliveryOrderId;
     private Double amount;
-    private String method;              // e.g., "Cash", "UPI", "Razorpay"
-    private String status;              // e.g., "SUCCESS", "PENDING"
-    private String razorpayPaymentId;   // Optional for online payments
+    private String method;
+    private String status;
+    private String razorpayPaymentId;
 }
+
