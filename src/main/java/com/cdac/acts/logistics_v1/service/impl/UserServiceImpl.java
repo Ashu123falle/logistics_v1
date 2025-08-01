@@ -22,6 +22,7 @@ public class UserServiceImpl implements UserService {
     private UserResponseDTO mapToResponseDTO(User user) {
         return UserResponseDTO.builder()
                 .userId(user.getUserId())
+
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .username(user.getUsername())
@@ -71,9 +72,9 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO updateUser(Long id, UserRequestDTO request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());        
+
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());
         user.setEmail(request.getEmail());

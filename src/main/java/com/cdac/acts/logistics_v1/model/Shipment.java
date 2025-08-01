@@ -37,4 +37,5 @@ public class Shipment {
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
+
 }

@@ -21,7 +21,7 @@ public class Driver extends User {
 
     @Column(unique = true, nullable = false)
     private String licenseNumber;
-    
+
     @ManyToOne
     @JoinColumn(name = "vehicle_id")
     private Vehicle currentVehicle;

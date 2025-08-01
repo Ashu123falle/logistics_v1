@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -23,6 +22,7 @@ public class Customer extends User {
     private String panNumber;
     private String industryType;
     private String companyAddress;
+
     private String companyEmail;
     
     private String contactPersonName;
@@ -30,4 +30,5 @@ public class Customer extends User {
 
     private LocalDateTime onboardingDate;
 //    private String kycStatus;
+
 }

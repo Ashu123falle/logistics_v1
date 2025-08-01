@@ -19,6 +19,5 @@ public class DeliveryOrderResponseDTO {
     private LocalDateTime scheduledDeliveryDate;
     private String notes;
 
-
    
 }

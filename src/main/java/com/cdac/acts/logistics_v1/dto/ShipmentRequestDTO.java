@@ -1,5 +1,6 @@
 package com.cdac.acts.logistics_v1.dto;
 
+
 import java.util.List;
 
 import lombok.*;
@@ -16,4 +17,5 @@ public class ShipmentRequestDTO {
 	private Double weight;
 	private List<String> images;
 	private long customerId;
+
 }

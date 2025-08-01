@@ -7,4 +7,5 @@ public class VehicleBasicDTO {
 	private String type;
 	private Double capacity;
 	private String status;
+
 }

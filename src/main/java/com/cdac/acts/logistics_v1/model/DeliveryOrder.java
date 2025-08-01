@@ -37,6 +37,7 @@ public class DeliveryOrder {
 
     @OneToOne
     @JoinColumn(name = "driver_id", referencedColumnName = "user_id")
+
     private Driver assignedDriver;
 
     private Double cost;

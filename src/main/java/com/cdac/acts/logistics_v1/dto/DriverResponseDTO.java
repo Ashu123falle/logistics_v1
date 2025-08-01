@@ -2,7 +2,9 @@ package com.cdac.acts.logistics_v1.dto;
 
 import com.cdac.acts.logistics_v1.model.Vehicle;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Data

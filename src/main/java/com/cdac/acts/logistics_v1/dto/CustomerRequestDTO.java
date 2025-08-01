@@ -1,5 +1,6 @@
 package com.cdac.acts.logistics_v1.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+
 public class CustomerRequestDTO extends UserRequestDTO {
     private String companyName;
     private String gstNumber;
