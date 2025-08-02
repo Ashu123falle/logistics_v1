@@ -11,12 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cdac.acts.logistic_v1.DTO.CustomerDTO;
-import com.cdac.acts.logistic_v1.DTO.UserDTO;
-import com.cdac.acts.logistic_v1.service.CustomerService;
-import com.cdac.acts.logistic_v1.service.UserService;
-import com.cdac.acts.logistics_v1.model.Customer;
-import com.cdac.acts.logistics_v1.model.User;
+import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
+import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
+import com.cdac.acts.logistics_v1.service.CustomerService;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -26,28 +23,29 @@ public class CustomerController {
 	CustomerService customerService;
 	
 	@PostMapping("addCustomer")
-	public void addCustomer(@RequestBody CustomerDTO customerDTO  ) {
-		customerService.addCustomer(customerDTO);
+	public void addCustomer(@RequestBody CustomerRequestDTO customerDTO  ) {
+		customerService.createCustomer(customerDTO);
 	}
 	
-	@PostMapping("updateCustomer")
-	public String updateCustomer(@RequestBody CustomerDTO customerDTO) {
-		return customerService.updateCustomer(customerDTO) != null? "User updated successfully !!!" : "User could not be updated";
+	@PostMapping("updateCustomer/{id}")
+	public String updateCustomer(@RequestBody CustomerRequestDTO customerDTO,@RequestParam long id) {
+		return customerService.updateCustomer(id,customerDTO) != null? "User updated successfully !!!" : "User could not be updated";
 	}
 	
 	@GetMapping("deleteCustomer/{ID}")
 	public String deleteCustomer(@RequestParam Long id) {
-		return customerService.deleteCustomer(id) ? "User deleted successfully !!!" : "User could not be deleted";
+		customerService.deleteCustomer(id);
+		return   "User deleted successfully !!!";
 	}
 	
 	@GetMapping("getCustomer")
-	public List<Customer> getCustomer(@RequestParam int pageNo, @RequestParam int pageSize) {
-		return customerService.getCustomer(pageNo-1,pageSize);
+	public List<CustomerResponseDTO> getCustomer(@RequestParam int pageNo, @RequestParam int pageSize) {
+		return customerService.getAllCustomers();
 	}
 	
 	//Change return type to user 
-	@GetMapping("getUsersById/{ID}")
-	public boolean getUserById(@PathVariable Long id) {
+	@GetMapping("getCustomerById/{ID}")
+	public CustomerResponseDTO getUserById(@PathVariable Long id) {
 		return customerService.getCustomerById(id);
 	}
 	
