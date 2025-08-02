@@ -13,8 +13,6 @@ public interface RouteService {
     void deleteRoute(Long id);
 
     // Extra
-
     RouteResponseDTO fetchAndSaveRouteDetails(Double srcLat, Double srcLng, Double dstLat, Double dstLng);
-
 }
 
