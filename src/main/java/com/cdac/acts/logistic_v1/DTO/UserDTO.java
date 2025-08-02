@@ -1,6 +1,7 @@
 package com.cdac.acts.logistic_v1.DTO;
 
-import com.cdac.acts.logistics_v1.model.User.Role;
+
+import com.cdac.acts.logistics_v1.enums.Role;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
