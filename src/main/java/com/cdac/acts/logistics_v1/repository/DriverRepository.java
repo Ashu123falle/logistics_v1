@@ -1,6 +1,4 @@
 package com.cdac.acts.logistics_v1.repository;
-
-package com.cdac.acts.logistics_v1.repository;
 import java.util.List;
 import java.util.Optional;
 
