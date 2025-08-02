@@ -108,7 +108,7 @@ public class ShipmentServiceImpl implements ShipmentService {
                 .value(shipment.getValue())
                 .dimensions(shipment.getDimensions())
                 .weight(shipment.getWeight())
-                .customerId(shipment.getCustomer().getId())
+                .customerId(shipment.getCustomer().getUserId())
                 .build();
     }
 }
