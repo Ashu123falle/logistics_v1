@@ -11,5 +11,5 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
 	
 //	    Methods added 
 	    List<DeliveryOrder> findByShipmentId(Long shipmentId);
-	    List<DeliveryOrder> findByAssignedDriverId(Long driverId);
+	    List<DeliveryOrder> findByAssignedDriverUserId(Long userId);
 }

@@ -28,32 +28,33 @@ import lombok.experimental.SuperBuilder;
 
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User {
-	  @Id
-	    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	    private Long userId;
+	@Id
+	@Column(name = "user_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long userId;
 
-	    private String firstName;
-	    private String lastName;
+	private String firstName;
+	private String lastName;
 
-	    @Column(unique = true, nullable = false)
-	    private String username;
+	@Column(unique = true, nullable = false)
+	private String username;
 
-	    @Column(nullable = false)
-	    private String password;
+	@Column(nullable = false)
+	private String password;
 
-	    @Column(unique = true, nullable = false)
-	    private String email;
+	@Column(unique = true, nullable = false)
+	private String email;
 
-	    private String phoneNumber;
+	private String phoneNumber;
 
-	    @Enumerated(EnumType.STRING)
-	    private Role role;
+	@Enumerated(EnumType.STRING)
+	private Role role;
 
-	    @Enumerated(EnumType.STRING)
-	    private UserStatus status;
+	@Enumerated(EnumType.STRING)
+	private UserStatus status;
 
-	    private LocalDateTime createdAt;
-	    private LocalDateTime updatedAt;
-	    
-    
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
+
+
 }

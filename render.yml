@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: logistics-backend
+    env: docker
+    branch: main     # or your branch like 'ashutosh'
+    autoDeploy: true
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://turntable.proxy.rlwy.net:42475/railway
+      - key: SPRING_DATASOURCE_USERNAME
+        value: root
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: hKyQVgLtAhdAGRoOFDvOWUVIDspjWWYz

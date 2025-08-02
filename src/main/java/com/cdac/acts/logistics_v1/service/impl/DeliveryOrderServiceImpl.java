@@ -125,7 +125,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     @Override
     public List<DeliveryOrderResponseDTO> getOrdersByDriverId(Long driverId) {
-        return deliveryOrderRepository.findByAssignedDriverId(driverId).stream()
+        return deliveryOrderRepository.findByAssignedDriverUserId(driverId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
