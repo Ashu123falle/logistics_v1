@@ -19,9 +19,14 @@
 //    List<DeliveryOrder> findByStatus(String status);
 //}
 
+package com.cdac.acts.logistics_v1.repository;
 import java.util.List;
 import java.util.Optional;
-package com.cdac.acts.logistics_v1.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.cdac.acts.logistics_v1.model.DeliveryOrder;
+import com.cdac.acts.logistics_v1.model.Driver;
 
 public interface DriverRepository extends JpaRepository< Driver , Long>{
 

@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.cdac.acts.logistics_v1.dto.DeliveryOrderRequestDTO;
 import com.cdac.acts.logistics_v1.dto.DeliveryOrderResponseDTO;
@@ -23,35 +23,37 @@ import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
 import com.cdac.acts.logistics_v1.service.DeliveryOrderService;
 
 @Service
+@Transactional
+
 public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
-    @Autowired
-    private DeliveryOrderRepository deliveryOrderRepository;
+    private final DeliveryOrderRepository deliveryOrderRepository;
+    private final ShipmentRepository shipmentRepository;
+    private final RouteRepository routeRepository;
+    private final DriverRepository driverRepository;
 
-    @Autowired
-    private ShipmentRepository shipmentRepository;
+    public DeliveryOrderServiceImpl(
+            DeliveryOrderRepository deliveryOrderRepository,
+            ShipmentRepository shipmentRepository,
+            RouteRepository routeRepository,
+            DriverRepository driverRepository
+    ) {
+        this.deliveryOrderRepository = deliveryOrderRepository;
+        this.shipmentRepository = shipmentRepository;
+        this.routeRepository = routeRepository;
+        this.driverRepository = driverRepository;
+    }
 
-    @Autowired
-    private RouteRepository routeRepository;
-
-    @Autowired
-    private DriverRepository driverRepository;
-
-    
-//      Create Delivery Order
     @Override
     public DeliveryOrderResponseDTO createOrder(DeliveryOrderRequestDTO request) {
         Shipment shipment = shipmentRepository.findById(request.getShipmentId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Shipment not found with id: " + request.getShipmentId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found with id: " + request.getShipmentId()));
 
         Route route = routeRepository.findById(request.getRouteId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Route not found with id: " + request.getRouteId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Route not found with id: " + request.getRouteId()));
 
         Driver driver = driverRepository.findById(request.getDriverId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Driver not found with id: " + request.getDriverId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + request.getDriverId()));
 
         DeliveryOrder order = DeliveryOrder.builder()
                 .shipment(shipment)
@@ -64,13 +66,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        DeliveryOrder saved = deliveryOrderRepository.save(order);
-        return mapToResponse(saved);
+        return mapToResponse(deliveryOrderRepository.save(order));
     }
 
-    
-//    Get Delivery Order by ID
-//    to handle exception need to make exceptionhandling global and unchecked 
     @Override
     public DeliveryOrderResponseDTO getOrderById(Long id) {
         DeliveryOrder order = deliveryOrderRepository.findById(id)
@@ -78,35 +76,27 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         return mapToResponse(order);
     }
 
-    
-//  Get all Delivery Orders with pagination
     @Override
     public List<DeliveryOrderResponseDTO> getAllOrders(int pageNo, int pageSize) {
-        return deliveryOrderRepository.findAll(PageRequest.of(pageNo, pageSize))
-                .getContent()
+        return deliveryOrderRepository.findAll(PageRequest.of(pageNo, pageSize)).getContent()
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    
-//  Update Delivery Order
     @Override
     public DeliveryOrderResponseDTO updateOrder(Long id, DeliveryOrderRequestDTO request) {
         DeliveryOrder order = deliveryOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
 
         Shipment shipment = shipmentRepository.findById(request.getShipmentId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Shipment not found with id: " + request.getShipmentId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found with id: " + request.getShipmentId()));
 
         Route route = routeRepository.findById(request.getRouteId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Route not found with id: " + request.getRouteId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Route not found with id: " + request.getRouteId()));
 
         Driver driver = driverRepository.findById(request.getDriverId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Driver not found with id: " + request.getDriverId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + request.getDriverId()));
 
         order.setShipment(shipment);
         order.setRoute(route);
@@ -116,13 +106,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         order.setScheduledPickupDate(request.getScheduledPickupDate());
         order.setNotes(request.getNotes());
 
-        DeliveryOrder updated = deliveryOrderRepository.save(order);
-        return mapToResponse(updated);
+        return mapToResponse(deliveryOrderRepository.save(order));
     }
 
-    
-//    Delete Delivery Order 
-//    to handle exception need to make exceptionhandling global and unchecked 
     @Override
     public void deleteOrder(Long id) {
         DeliveryOrder order = deliveryOrderRepository.findById(id)
@@ -130,8 +116,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         deliveryOrderRepository.delete(order);
     }
 
-    
-//     Get Orders by Shipment ID
     @Override
     public List<DeliveryOrderResponseDTO> getOrdersByShipmentId(Long shipmentId) {
         return deliveryOrderRepository.findByShipmentId(shipmentId).stream()
@@ -139,8 +123,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
                 .collect(Collectors.toList());
     }
 
-    
-//  Get Orders by Driver ID
     @Override
     public List<DeliveryOrderResponseDTO> getOrdersByDriverId(Long driverId) {
         return deliveryOrderRepository.findByAssignedDriverId(driverId).stream()
@@ -148,14 +130,12 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
                 .collect(Collectors.toList());
     }
 
-   
-//     Map Entity to DTO
     private DeliveryOrderResponseDTO mapToResponse(DeliveryOrder order) {
         return new DeliveryOrderResponseDTO(
                 order.getId(),
                 order.getShipment().getId(),
                 order.getRoute().getId(),
-                order.getAssignedDriver().getId(),
+                order.getAssignedDriver().getUserId(),
                 order.getCost(),
                 order.getStatus().name(),
                 order.getScheduledPickupDate(),
@@ -164,4 +144,3 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         );
     }
 }
-
