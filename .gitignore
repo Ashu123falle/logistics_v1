@@ -1,25 +1,27 @@
-HELP.md
+# ===== Maven / Java =====
 target/
+HELP.md
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
+# ===== Eclipse / Spring Tool Suite =====
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
 .sts4-cache
+.metadata/
 
-### IntelliJ IDEA ###
-.idea
+# ===== IntelliJ IDEA =====
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+# ===== NetBeans =====
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -29,7 +31,18 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# ===== VS Code =====
 .vscode/
 
-.metadata
+# ===== Frontend (React / Node) =====
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/.cache/
+frontend/.parcel-cache/
+frontend/.next/
+frontend/dist/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.turbo/
