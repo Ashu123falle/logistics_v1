@@ -2,7 +2,8 @@ services:
   - type: web
     name: logistics-backend
     env: docker
-    branch: main     # or your branch like 'ashutosh'
+    rootDir: backend       # ← important!
+    branch: main
     autoDeploy: true
     envVars:
       - key: SPRING_DATASOURCE_URL
