@@ -15,4 +15,8 @@ public interface CustomerService {
 
     // Extra
     List<ShipmentResponseDTO> getCustomerShipments(Long customerId);
+    
+  //Registration
+    void registerTempCustomer(CustomerRequestDTO request);
+    void saveCustomerIfOtpVerified(String email);
 }

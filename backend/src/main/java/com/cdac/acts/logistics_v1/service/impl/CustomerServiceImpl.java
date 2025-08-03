@@ -12,6 +12,8 @@ import com.cdac.acts.logistics_v1.model.Shipment;
 import com.cdac.acts.logistics_v1.repository.CustomerRepository;
 import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
 import com.cdac.acts.logistics_v1.service.CustomerService;
+import com.cdac.acts.logistics_v1.utilities.OtpStore;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class CustomerServiceImpl implements CustomerService {
 	private final CustomerRepository customerRepository;
 	@Autowired
 	private final ShipmentRepository shipmentRepository;
+	
+	@Autowired
+	private final OtpServiceImpl otpService;
 
 	@Override
 	public CustomerResponseDTO createCustomer(CustomerRequestDTO request) {
@@ -148,5 +153,42 @@ public class CustomerServiceImpl implements CustomerService {
 				.companyEmail(customer.getCompanyEmail())
 				.build();
 	}
+	
+	//Registration related methods
+		@Override
+		public void registerTempCustomer(CustomerRequestDTO request) {
+		    OtpStore.tempUsers.put(request.getCompanyEmail(), request);
+		    otpService.generateAndSendOtp(request.getCompanyEmail());
+		}
+
+		@Override
+		public void saveCustomerIfOtpVerified(String email) {
+			CustomerRequestDTO request = OtpStore.tempUsers.get(email);
+		    if (request != null) {
+		    	Customer customer = Customer.builder()
+						.firstName(request.getFirstName())
+						.lastName(request.getLastName())
+						.username(request.getUsername())
+						.email(request.getEmail())
+						.password(request.getPassword()) // You can encode password if using Spring Security
+						.phoneNumber(request.getPhoneNumber())
+						.role(com.cdac.acts.logistics_v1.enums.Role.CUSTOMER)
+						.status(com.cdac.acts.logistics_v1.enums.UserStatus.ACTIVE)
+						.onboardingDate(LocalDateTime.now())
+						//                .kycStatus("PENDING")
+						.companyName(request.getCompanyName())
+						.gstNumber(request.getGstNumber())
+						.panNumber(request.getPanNumber())
+						.industryType(request.getIndustryType())
+						.companyAddress(request.getCompanyAddress())
+						.contactPersonName(request.getContactPersonName())
+						.contactPersonPhone(request.getContactPersonPhone())
+						.companyEmail(request.getCompanyEmail())
+						.build();
+
+				customerRepository.save(customer);
+				OtpStore.tempUsers.remove(email); // Clear the temporary user after saving
+		    }
+		}
 
 }
