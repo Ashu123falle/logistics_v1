@@ -1,23 +1,15 @@
 package com.cdac.acts.logistics_v1.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.cdac.acts.logistics_v1.dto.ShipmentRequestDTO;
 import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
 import com.cdac.acts.logistics_v1.service.ShipmentService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/shipments")
@@ -27,21 +19,25 @@ public class ShipmentController {
     @Autowired
     private ShipmentService shipmentService;
 
-    // Create Shipment
+    // ✅ Create Shipment
     @PostMapping
     public ResponseEntity<ShipmentResponseDTO> createShipment(@RequestBody ShipmentRequestDTO request) {
         ShipmentResponseDTO shipment = shipmentService.createShipment(request);
-        return ResponseEntity.ok(shipment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(shipment);
     }
 
-    // Get Shipment by ID
+    // ✅ Get Shipment by ID
     @GetMapping("/{id}")
     public ResponseEntity<ShipmentResponseDTO> getShipmentById(@PathVariable Long id) {
         ShipmentResponseDTO shipment = shipmentService.getShipmentById(id);
-        return ResponseEntity.ok(shipment);
+        if (shipment != null) {
+            return ResponseEntity.ok(shipment);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
-    // Get All Shipments with Pagination
+    // ✅ Get All Shipments with Pagination
     @GetMapping
     public ResponseEntity<List<ShipmentResponseDTO>> getAllShipments(
             @RequestParam(defaultValue = "1") int pageNo,
@@ -50,23 +46,31 @@ public class ShipmentController {
         return ResponseEntity.ok(shipments);
     }
 
-    // Update Shipment
+    // ✅ Update Shipment
     @PutMapping("/{id}")
     public ResponseEntity<ShipmentResponseDTO> updateShipment(
             @PathVariable Long id,
             @RequestBody ShipmentRequestDTO request) {
         ShipmentResponseDTO updatedShipment = shipmentService.updateShipment(id, request);
-        return ResponseEntity.ok(updatedShipment);
+        if (updatedShipment != null) {
+            return ResponseEntity.ok(updatedShipment);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
-    // Delete Shipment
+    // ✅ Delete Shipment
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteShipment(@PathVariable Long id) {
-        shipmentService.deleteShipment(id);
-        return ResponseEntity.ok("Shipment deleted successfully!");
+    public ResponseEntity<Void> deleteShipment(@PathVariable Long id) {
+        boolean deleted = shipmentService.deleteShipment(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
-    // Get Shipments by Type with Pagination
+    // ✅ Get Shipments by Type with Pagination
     @GetMapping("/type/{type}")
     public ResponseEntity<List<ShipmentResponseDTO>> getShipmentsByType(
             @PathVariable String type,
