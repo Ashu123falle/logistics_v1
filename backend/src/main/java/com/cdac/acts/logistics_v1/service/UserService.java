@@ -10,7 +10,7 @@ public interface UserService {
     UserResponseDTO getUserById(Long id);
     List<UserResponseDTO> getAllUsers();
     UserResponseDTO updateUser(Long id, UserRequestDTO request);
-    void deleteUser(Long id);
+    boolean deleteUser(Long id);
 
     // Extras
     List<UserResponseDTO> findUsersByRole(String role);

@@ -3,6 +3,7 @@ package com.cdac.acts.logistics_v1.service.impl;
 import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
 import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
+import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
 import com.cdac.acts.logistics_v1.model.Customer;
 
 import com.cdac.acts.logistics_v1.model.Shipment;
@@ -59,10 +60,13 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public CustomerResponseDTO getCustomerById(Long id) {
-		Customer customer = customerRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
-		return mapToDTO(customer);
+	    System.out.println("Fetching customer with user_id: " + id);
+	    Customer customer = customerRepository.findById(id)
+	            .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
+
+	    return mapToDTO(customer);
 	}
+
 
 	@Override
 	public List<CustomerResponseDTO> getAllCustomers() {
