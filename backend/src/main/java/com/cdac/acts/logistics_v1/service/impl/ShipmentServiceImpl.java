@@ -69,9 +69,14 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
     @Override
-    public void deleteShipment(Long id) {
-        shipmentRepository.deleteById(id);
+    public boolean deleteShipment(Long id) {
+        if (shipmentRepository.existsById(id)) {
+            shipmentRepository.deleteById(id);
+            return true; 
+        }
+        return false;
     }
+
 
     @Override
     public List<ShipmentResponseDTO> getShipmentsByType(String type, int pageNo, int pageSize) {

@@ -13,7 +13,7 @@ public interface ShipmentService {
 //    for pagination 
     List<ShipmentResponseDTO> getAllShipments(int pageNo, int pageSize); 
     ShipmentResponseDTO updateShipment(Long id, ShipmentRequestDTO request);
-    void deleteShipment(Long id);
+    boolean deleteShipment(Long id);
 
  //  Extra
 //    List<ShipmentResponseDTO> getShipmentsByType(String type);

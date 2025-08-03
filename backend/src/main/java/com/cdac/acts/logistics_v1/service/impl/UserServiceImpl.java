@@ -94,6 +94,7 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+
     @Override
     public List<UserResponseDTO> findUsersByRole(String role) {
         return userRepository.findByRole(role).stream()
