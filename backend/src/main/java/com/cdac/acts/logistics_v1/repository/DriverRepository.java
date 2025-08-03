@@ -4,10 +4,6 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.cdac.acts.logistics_v1.model.DeliveryOrder;
-import com.cdac.acts.logistics_v1.model.Driver;
-
-import org.springframework.data.jpa.repository.JpaRepository;
 import com.cdac.acts.logistics_v1.model.Driver;
 
 public interface DriverRepository extends JpaRepository<Driver, Long> {
