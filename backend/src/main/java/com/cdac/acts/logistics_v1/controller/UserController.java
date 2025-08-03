@@ -1,9 +1,16 @@
 package com.cdac.acts.logistics_v1.controller;
 
-import java.util.List;
+import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
+import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
+import com.cdac.acts.logistics_v1.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,10 +28,12 @@ import com.cdac.acts.logistics_v1.service.UserService;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/user")
+
 public class UserController {
 
     @Autowired
     private UserService userService;
+
 
     @PostMapping
     public ResponseEntity<String> addUser( @RequestBody UserRequestDTO userDTO) {

@@ -10,7 +10,7 @@ public interface RouteService {
     RouteResponseDTO getRouteById(Long id);
     List<RouteResponseDTO> getAllRoutes();
     RouteResponseDTO updateRoute(Long id, RouteRequestDTO request);
-    void deleteRoute(Long id);
+    boolean deleteRoute(Long id);
 
     // Extra
     RouteResponseDTO fetchAndSaveRouteDetails(Double srcLat, Double srcLng, Double dstLat, Double dstLng);
