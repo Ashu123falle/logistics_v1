@@ -19,14 +19,14 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // ✅ Create User
+    //  Create User
     @PostMapping
     public ResponseEntity<String> addUser(@RequestBody UserRequestDTO userDTO) {
         userService.createUser(userDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body("User created successfully!");
     }
 
-    // ✅ Update User by ID
+    //  Update User by ID
     @PutMapping("/{id}")
     public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody UserRequestDTO userDTO) {
         UserResponseDTO updatedUser = userService.updateUser(id, userDTO);
@@ -38,7 +38,7 @@ public class UserController {
         }
     }
 
-    // ✅ Delete User by ID
+    //  Delete User by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.deleteUser(id);
@@ -50,14 +50,14 @@ public class UserController {
         }
     }
 
-    // ✅ Get All Users
+    //  Get All Users
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getUsers() {
         List<UserResponseDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
-    // ✅ Get User By ID
+    //  Get User By ID
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         UserResponseDTO user = userService.getUserById(id);

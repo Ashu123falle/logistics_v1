@@ -48,17 +48,17 @@ public class CustomerController {
         return ResponseEntity.noContent().build(); // 204 No Content
     }
 
-    /**
-     * Get all customers with optional pagination
-     */
-    @GetMapping
-    public ResponseEntity<List<CustomerResponseDTO>> getAllCustomers(
-            @RequestParam(defaultValue = "1") int pageNo,
-            @RequestParam(defaultValue = "10") int pageSize) {
-
-        List<CustomerResponseDTO> customers = customerService.getAllCustomers(Math.max(pageNo - 1, 0), pageSize);
-        return ResponseEntity.ok(customers);
-    }
+//    /**
+//     * Get all customers with optional pagination
+//     */
+//    @GetMapping
+//    public ResponseEntity<List<CustomerResponseDTO>> getAllCustomers(
+//            @RequestParam(defaultValue = "1") int pageNo,
+//            @RequestParam(defaultValue = "10") int pageSize) {
+//
+//        List<CustomerResponseDTO> customers = customerService.getAllCustomers(Math.max(pageNo - 1, 0), pageSize);
+//        return ResponseEntity.ok(customers);
+//    }
 
     /**
      * Get single customer by ID

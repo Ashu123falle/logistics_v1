@@ -19,14 +19,14 @@ public class RouteController {
 
     private final RouteService routeService;
 
-    // ✅ Create Route (will call OpenRouteService internally)
+    //  Create Route (will call OpenRouteService internally)
     @PostMapping
     public ResponseEntity<RouteResponseDTO> createRoute(@RequestBody RouteRequestDTO requestDTO) {
         RouteResponseDTO createdRoute = routeService.createRoute(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRoute); // 201 Created
     }
 
-    // ✅ Get route by ID
+    //  Get route by ID
     @GetMapping("/{id}")
     public ResponseEntity<RouteResponseDTO> getRouteById(@PathVariable Long id) {
         RouteResponseDTO route = routeService.getRouteById(id);
@@ -37,7 +37,7 @@ public class RouteController {
         }
     }
 
-    // ✅ Get all routes
+    //  Get all routes
     @GetMapping
     public ResponseEntity<List<RouteResponseDTO>> getAllRoutes() {
         List<RouteResponseDTO> routes = routeService.getAllRoutes();
@@ -55,7 +55,7 @@ public class RouteController {
         }
     }
 
-    // ✅ Delete route by ID
+    //  Delete route by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoute(@PathVariable Long id) {
         boolean deleted = routeService.deleteRoute(id);
