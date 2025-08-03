@@ -28,12 +28,10 @@ import com.cdac.acts.logistics_v1.service.UserService;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/user")
-
 public class UserController {
 
     @Autowired
     private UserService userService;
-
 
     @PostMapping
     public ResponseEntity<String> addUser( @RequestBody UserRequestDTO userDTO) {
