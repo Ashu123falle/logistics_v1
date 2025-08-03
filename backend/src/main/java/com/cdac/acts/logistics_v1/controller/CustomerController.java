@@ -1,5 +1,12 @@
 package com.cdac.acts.logistics_v1.controller;
 
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
 import com.cdac.acts.logistics_v1.service.CustomerService;
@@ -11,61 +18,52 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/customers")
-@CrossOrigin("*")
-@RequiredArgsConstructor
+@RequestMapping("/api/customer")
 public class CustomerController {
 
-    private final CustomerService customerService;
+    @Autowired
+    private CustomerService customerService;	
 
-    /**
-     * Create a new Customer
-     */
+    // ✅ Create Customer
     @PostMapping
-    public ResponseEntity<CustomerResponseDTO> createCustomer(@RequestBody CustomerRequestDTO customerDTO) {
-        CustomerResponseDTO createdCustomer = customerService.createCustomer(customerDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomer);
+    public ResponseEntity<String> createCustomer(@RequestBody CustomerRequestDTO customerDTO) {
+        customerService.createCustomer(customerDTO);
+        return ResponseEntity.status(201).body("Customer created successfully.");
     }
 
-    /**
-     * Update existing customer by ID
-     */
+    // ✅ Update Customer
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerResponseDTO> updateCustomer(
-            @PathVariable Long id,
-            @RequestBody CustomerRequestDTO customerDTO) {
-
-        CustomerResponseDTO updatedCustomer = customerService.updateCustomer(id, customerDTO);
-        return ResponseEntity.ok(updatedCustomer);
+    public ResponseEntity<String> updateCustomer(@PathVariable Long id,
+                                                 @RequestBody CustomerRequestDTO customerDTO) {
+        boolean isUpdated = customerService.updateCustomer(id, customerDTO) != null;
+        return isUpdated 
+            ? ResponseEntity.ok("Customer updated successfully.")
+            : ResponseEntity.badRequest().body("Failed to update customer.");
     }
 
-    /**
-     * Delete customer by ID
-     */
+    // ✅ Delete Customer
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<String> deleteCustomer(@PathVariable Long id) {
         customerService.deleteCustomer(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.ok("Customer deleted successfully.");
     }
 
-//    /**
-//     * Get all customers with optional pagination
-//     */
-//    @GetMapping
-//    public ResponseEntity<List<CustomerResponseDTO>> getAllCustomers(
-//            @RequestParam(defaultValue = "1") int pageNo,
-//            @RequestParam(defaultValue = "10") int pageSize) {
-//
-//        List<CustomerResponseDTO> customers = customerService.getAllCustomers(Math.max(pageNo - 1, 0), pageSize);
-//        return ResponseEntity.ok(customers);
-//    }
+    // ✅ Get All Customers (with pagination placeholders)
+    @GetMapping
+    public ResponseEntity<List<CustomerResponseDTO>> getAllCustomers(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize) {
 
-    /**
-     * Get single customer by ID
-     */
+        List<CustomerResponseDTO> customers = customerService.getAllCustomers(); // You can add pagination later
+        return ResponseEntity.ok(customers);
+    }
+
+    // ✅ Get Customer by ID
     @GetMapping("/{id}")
     public ResponseEntity<CustomerResponseDTO> getCustomerById(@PathVariable Long id) {
         CustomerResponseDTO customer = customerService.getCustomerById(id);
-        return ResponseEntity.ok(customer);
+        return customer != null 
+            ? ResponseEntity.ok(customer)
+            : ResponseEntity.notFound().build();
     }
 }

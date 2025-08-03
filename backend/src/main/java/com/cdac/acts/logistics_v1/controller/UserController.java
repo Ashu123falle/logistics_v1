@@ -8,64 +8,65 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
+import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
+import com.cdac.acts.logistics_v1.service.UserService;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("/users") // ✅ Base path for all user endpoints
+@RequestMapping("/api/user")
+
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    //  Create User
+
     @PostMapping
-    public ResponseEntity<String> addUser(@RequestBody UserRequestDTO userDTO) {
+    public ResponseEntity<String> addUser( @RequestBody UserRequestDTO userDTO) {
         userService.createUser(userDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body("User created successfully!");
+        return ResponseEntity.ok("User created successfully.");
     }
 
-    //  Update User by ID
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody UserRequestDTO userDTO) {
-        UserResponseDTO updatedUser = userService.updateUser(id, userDTO);
-
-        if (updatedUser != null) {
-            return ResponseEntity.ok("User updated successfully!");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
-        }
+    public ResponseEntity<String> updateUser(@PathVariable Long id,  @RequestBody UserRequestDTO userDTO) {
+        boolean updated = userService.updateUser(id, userDTO) != null;
+        return updated
+                ? ResponseEntity.ok("User updated successfully.")
+                : ResponseEntity.badRequest().body("User could not be updated.");
     }
 
-    //  Delete User by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.deleteUser(id);
-
-        if (deleted) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User deleted successfully!");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
-        }
+        return deleted
+                ? ResponseEntity.ok("User deleted successfully.")
+                : ResponseEntity.badRequest().body("User could not be deleted.");
     }
 
-    //  Get All Users
     @GetMapping
-    public ResponseEntity<List<UserResponseDTO>> getUsers() {
-        List<UserResponseDTO> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    //  Get User By ID
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         UserResponseDTO user = userService.getUserById(id);
-
-        if (user != null) {
-            return ResponseEntity.ok(user);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return user != null
+                ? ResponseEntity.ok(user)
+                : ResponseEntity.notFound().build();
     }
 }
