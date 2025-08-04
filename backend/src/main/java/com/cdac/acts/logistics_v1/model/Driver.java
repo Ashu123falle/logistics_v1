@@ -1,5 +1,7 @@
 package com.cdac.acts.logistics_v1.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -24,6 +26,7 @@ public class Driver extends User {
 
     @ManyToOne
     @JoinColumn(name = "vehicle_id")
+    @JsonBackReference
     private Vehicle currentVehicle;
 }
 

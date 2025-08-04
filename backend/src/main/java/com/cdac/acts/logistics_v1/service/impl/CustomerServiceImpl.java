@@ -152,8 +152,8 @@ public class CustomerServiceImpl implements CustomerService {
     // Registration-related methods
     @Override
     public void registerTempCustomer(CustomerRequestDTO request) {
-        OtpStore.tempUsers.put(request.getCompanyEmail(), request);
-        otpService.generateAndSendOtp(request.getCompanyEmail());
+        OtpStore.tempUsers.put(request.getEmail(), request);
+        otpService.generateAndSendOtp(request.getEmail());
     }
 
     @Override

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
 import com.cdac.acts.logistics_v1.dto.OtpVerificationRequest;
+import com.cdac.acts.logistics_v1.model.Customer;
+import com.cdac.acts.logistics_v1.repository.CustomerRepository;
 import com.cdac.acts.logistics_v1.service.CustomerService;
 import com.cdac.acts.logistics_v1.service.OtpService;
 
@@ -23,7 +25,8 @@ public class CustomerController {
 
     @Autowired
     private OtpService otpService;
-
+    
+   
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCustomer(@PathVariable Long id,
                                                  @RequestBody CustomerRequestDTO customerDTO) {

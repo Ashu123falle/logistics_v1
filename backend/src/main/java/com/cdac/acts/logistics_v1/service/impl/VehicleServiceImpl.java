@@ -22,7 +22,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public VehicleResponseDTO createVehicle(VehicleRequestDTO request) {
         Vehicle vehicle = new Vehicle();
-//        vehicle.setVehicleNumber(request.getVehicleNumber());
+        vehicle.setRegistrationNumber(request.getVehicleNumber());
         vehicle.setModel(request.getModel());
         vehicle.setType(request.getType());
         vehicle.setCapacity(request.getCapacity());
@@ -87,7 +87,7 @@ public class VehicleServiceImpl implements VehicleService {
     private VehicleResponseDTO mapToResponseDTO(Vehicle vehicle) {
         VehicleResponseDTO dto = new VehicleResponseDTO();
         dto.setId(vehicle.getId());
-//        dto.setVehicleNumber(vehicle.getVehicleNumber());
+        dto.setVehicleNumber(vehicle.getRegistrationNumber());
         dto.setModel(vehicle.getModel());
         dto.setType(vehicle.getType());
         dto.setCapacity(vehicle.getCapacity());
