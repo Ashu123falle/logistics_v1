@@ -113,6 +113,7 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+
     @Override
     public List<UserResponseDTO> findUsersByRole(String role) {
         Role roleEnum = Role.valueOf(role.toUpperCase()); // safer enum conversion

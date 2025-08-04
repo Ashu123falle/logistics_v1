@@ -12,6 +12,7 @@ import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
 import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
 import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
+import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
 import com.cdac.acts.logistics_v1.model.Customer;
 import com.cdac.acts.logistics_v1.model.Shipment;
 import com.cdac.acts.logistics_v1.repository.CustomerRepository;

@@ -90,9 +90,14 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public void deleteRoute(Long id) {
-        routeRepository.deleteById(id);
+    public boolean deleteRoute(Long id) {
+        if (routeRepository.existsById(id)) {
+            routeRepository.deleteById(id);
+            return true;  // Deletion successful
+        }
+        return false;  // Route not found
     }
+
 
 //    @Override
 //    public RouteResponseDTO fetchAndSaveRouteDetails(Double srcLat, Double srcLng, Double dstLat, Double dstLng) {
