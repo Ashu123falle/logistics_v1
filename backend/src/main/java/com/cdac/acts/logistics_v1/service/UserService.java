@@ -2,6 +2,8 @@ package com.cdac.acts.logistics_v1.service;
 
 import java.util.List;
 
+import com.cdac.acts.logistics_v1.dto.AuthRequestDTO;
+import com.cdac.acts.logistics_v1.dto.AuthResponseDTO;
 import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
 import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
 
@@ -14,5 +16,6 @@ public interface UserService {
 
     // Extras
     List<UserResponseDTO> findUsersByRole(String role);
-    UserResponseDTO authenticate(String username, String password);
+    
+    AuthResponseDTO authenticate(AuthRequestDTO request);
 }
