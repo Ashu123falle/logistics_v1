@@ -14,6 +14,7 @@ public class DeliveryOrderRequestDTO {
     private Double cost;
     private String status;
     private LocalDateTime scheduledPickupDate;
+    private LocalDateTime scheduledDeliveredDate;
     private String notes;
 
 }
