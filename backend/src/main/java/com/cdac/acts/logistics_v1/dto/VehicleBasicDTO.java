@@ -11,6 +11,6 @@ public class VehicleBasicDTO {
 	private String model;
 	private String type;
 	private Double capacity;
-	private String status;
+	private Boolean status;
 
 }

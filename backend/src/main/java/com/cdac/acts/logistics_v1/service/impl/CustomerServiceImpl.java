@@ -8,16 +8,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.cdac.acts.logistics_v1.dto.CustomerDashboardDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
 import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
 import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
+import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
 import com.cdac.acts.logistics_v1.model.Customer;
 import com.cdac.acts.logistics_v1.model.Shipment;
 import com.cdac.acts.logistics_v1.repository.CustomerRepository;
+import com.cdac.acts.logistics_v1.repository.DeliveryOrderRepository;
 import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
 import com.cdac.acts.logistics_v1.service.CustomerService;
+
 import com.cdac.acts.logistics_v1.utilities.OtpStore;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,43 +30,44 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
-    @Autowired
+
+	
+	private final DeliveryOrderRepository deliveryOrderRepository;
+	
     private final CustomerRepository customerRepository;
 
-    @Autowired
     private final ShipmentRepository shipmentRepository;
 
-    @Autowired
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
     private final OtpServiceImpl otpService;
+  
+    @Override
+    public CustomerResponseDTO createCustomer(CustomerRequestDTO dto) {
+        Customer customer = Customer.builder()
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .username(dto.getUsername())
+                .email(dto.getEmail())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .phoneNumber(dto.getPhoneNumber())
+                .role(dto.getRole())
+                .status(dto.getStatus())
+                .onboardingDate(LocalDateTime.now())
+                .companyName(dto.getCompanyName())
+                .gstNumber(dto.getGstNumber())
+                .panNumber(dto.getPanNumber())
+                .industryType(dto.getIndustryType())
+                .companyAddress(dto.getCompanyAddress())
+                .contactPersonName(dto.getContactPersonName())
+                .contactPersonPhone(dto.getContactPersonPhone())
+                .companyEmail(dto.getCompanyEmail())
+                .build();
 
-//    @Override
-//    public CustomerResponseDTO createCustomer(CustomerRequestDTO dto) {
-//        Customer customer = Customer.builder()
-//                .firstName(dto.getFirstName())
-//                .lastName(dto.getLastName())
-//                .username(dto.getUsername())
-//                .email(dto.getEmail())
-//                .password(passwordEncoder.encode(dto.getPassword()))
-//                .phoneNumber(dto.getPhoneNumber())
-//                .role(dto.getRole())
-//                .status(dto.getStatus())
-//                .onboardingDate(LocalDateTime.now())
-//                .companyName(dto.getCompanyName())
-//                .gstNumber(dto.getGstNumber())
-//                .panNumber(dto.getPanNumber())
-//                .industryType(dto.getIndustryType())
-//                .companyAddress(dto.getCompanyAddress())
-//                .contactPersonName(dto.getContactPersonName())
-//                .contactPersonPhone(dto.getContactPersonPhone())
-//                .companyEmail(dto.getCompanyEmail())
-//                .build();
-//
-//        Customer saved = customerRepository.save(customer);
-//        return mapToDTO(saved);
-//    }
+        Customer saved = customerRepository.save(customer);
+        return mapToDTO(saved);
+    }
+
 
     @Override
     public CustomerResponseDTO getCustomerById(Long id) {
@@ -87,6 +93,7 @@ public class CustomerServiceImpl implements CustomerService {
         existing.setLastName(request.getLastName());
         existing.setEmail(request.getEmail());
         existing.setPhoneNumber(request.getPhoneNumber());
+
         existing.setCompanyName(request.getCompanyName());
         existing.setGstNumber(request.getGstNumber());
         existing.setPanNumber(request.getPanNumber());
@@ -149,6 +156,18 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
     }
 
+
+    @Override
+    public CustomerDashboardDTO getCustomerDashboard(Long customerId) {
+        Long totalOrders = deliveryOrderRepository.countByPlacedBy_UserId(customerId);
+        Double totalSpent = deliveryOrderRepository.sumTotalCostByPlacedByUserId(customerId);
+
+        return CustomerDashboardDTO.builder()
+                .totalOrders(totalOrders)
+                .totalSpent(totalSpent != null ? totalSpent : 0.0)
+                .build();
+    }
+
     // Registration-related methods
     @Override
     public void registerTempCustomer(CustomerRequestDTO request) {
@@ -184,4 +203,5 @@ public class CustomerServiceImpl implements CustomerService {
             OtpStore.tempUsers.remove(email); // Clear the temporary user after saving
         }
     }
+
 }

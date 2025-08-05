@@ -13,32 +13,41 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
+import com.cdac.acts.logistics_v1.dto.AdminDashboardDTO;
+
 import com.cdac.acts.logistics_v1.dto.AuthRequestDTO;
 import com.cdac.acts.logistics_v1.dto.AuthResponseDTO;
 import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
 import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
+import com.cdac.acts.logistics_v1.enums.DeliveryStatus;
 import com.cdac.acts.logistics_v1.enums.Role;
+import com.cdac.acts.logistics_v1.enums.UserStatus;
 import com.cdac.acts.logistics_v1.model.User;
+import com.cdac.acts.logistics_v1.repository.DeliveryOrderRepository;
+import com.cdac.acts.logistics_v1.repository.DriverRepository;
 import com.cdac.acts.logistics_v1.repository.UserRepository;
 import com.cdac.acts.logistics_v1.service.UserService;
 import com.cdac.acts.logistics_v1.utilities.JwtUtil;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-	@Autowired
-	private AuthenticationManager authenticationManager;
 
-	@Autowired
-	private JwtUtil jwtUtil;
+	  private final AuthenticationManager authenticationManager;
+
+	  private final JwtUtil jwtUtil;
 	
-    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final UserRepository userRepository;
+    
+    private final DriverRepository driverRepository;
+    
+    private final DeliveryOrderRepository deliveryOrderRepository;
 
     private UserResponseDTO mapToResponseDTO(User user) {
         return UserResponseDTO.builder()
@@ -67,7 +76,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO createUser(UserRequestDTO request) {
+    public UserResponseDTO register(UserRequestDTO request) {
         User user = mapToEntity(request);
         user = userRepository.save(user);
         return mapToResponseDTO(user);
@@ -152,6 +161,21 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw new RuntimeException("Invalid credentials", e);
         }
+    }
+
+    @Override
+    public AdminDashboardDTO getAdminDashboard() {
+        Long totalDrivers = driverRepository.count();
+        Long activeDrivers = driverRepository.countByStatus(UserStatus.ACTIVE);
+        Long pendingOrders = deliveryOrderRepository.countByStatus(DeliveryStatus.PENDING); // or whatever your status enum/string is
+        Double totalRevenue = deliveryOrderRepository.sumAllDeliveredOrderCosts();
+
+        return AdminDashboardDTO.builder()
+                .totalDrivers(totalDrivers)
+                .activeDrivers(activeDrivers)
+                .pendingOrders(pendingOrders)
+                .totalRevenue(totalRevenue != null ? totalRevenue : 0.0)
+                .build();
     }
 
 }

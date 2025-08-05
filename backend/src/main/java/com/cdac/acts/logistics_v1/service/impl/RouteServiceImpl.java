@@ -39,8 +39,10 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public RouteResponseDTO createRoute(RouteRequestDTO request) {
        return fetchAndSaveRouteDetails(
+    		    request.getSourceAddress(),
                 request.getSourceLatitude(),
                 request.getSourceLongitude(),
+                request.getDestinationAddress(),
                 request.getDestinationLatitude(),
                 request.getDestinationLongitude()
         );
@@ -76,8 +78,9 @@ public class RouteServiceImpl implements RouteService {
         route.setTravelMode(request.getTravelMode());
 
         RouteResponseDTO updatedRoute = fetchAndSaveRouteDetails(
-                request.getSourceLatitude(), request.getSourceLongitude(),
-                request.getDestinationLatitude(), request.getDestinationLongitude()
+        		
+                request.getSourceAddress(), request.getSourceLatitude(), request.getSourceLongitude(),
+                request.getDestinationAddress(), request.getDestinationLatitude(), request.getDestinationLongitude()
         );
 
         route.setDistance(updatedRoute.getDistance());
@@ -136,7 +139,7 @@ public class RouteServiceImpl implements RouteService {
 //    }
 
     @Override
-    public RouteResponseDTO fetchAndSaveRouteDetails(Double srcLat, Double srcLng, Double dstLat, Double dstLng) {
+    public RouteResponseDTO fetchAndSaveRouteDetails(String srcAddress, Double srcLat, Double srcLng, String destAddress, Double dstLat, Double dstLng) {
     	HttpHeaders headers = new HttpHeaders();
     	headers.setContentType(MediaType.APPLICATION_JSON);
     	headers.set("Authorization",orsApiKey);
@@ -194,8 +197,8 @@ public class RouteServiceImpl implements RouteService {
             routeEntity.setDuration(duration);
             routeEntity.setGeometry(geometry);
             routeEntity.setInstructions(instructionBuilder.toString());
-            routeEntity.setSourceAddress("Source Address (reverse geocode if needed)");
-            routeEntity.setDestinationAddress("Destination Address (reverse geocode if needed)");
+            routeEntity.setSourceAddress(srcAddress);
+            routeEntity.setDestinationAddress(destAddress);
             routeEntity.setTravelMode("driving-car");
             routeEntity.setIsActive(true);
             routeEntity.setCreatedAt(LocalDateTime.now());
