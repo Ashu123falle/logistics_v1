@@ -1,5 +1,6 @@
 package com.cdac.acts.logistics_v1.service.impl;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ import com.cdac.acts.logistics_v1.repository.DriverLocationRepository;
 import com.cdac.acts.logistics_v1.repository.DriverRepository;
 import com.cdac.acts.logistics_v1.repository.VehicleRepository;
 import com.cdac.acts.logistics_v1.service.DriverService;
+import com.cdac.acts.logistics_v1.utilities.OtpStore;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,8 +36,9 @@ public class DriverServiceImpl implements DriverService {
     
     private final DriverLocationRepository driverLocationRepository;
     
+    private final OtpServiceImpl otpService;
+  
     private DriverResponseDTO mapToResponseDTO(Driver driver) {
-
         return DriverResponseDTO.builder()
         		.userId(driver.getUserId())
         		.firstName(driver.getFirstName())
@@ -49,7 +52,7 @@ public class DriverServiceImpl implements DriverService {
         		.vehicle(driver.getCurrentVehicle())
                 .build();
     }
-    
+
     private Driver mapToEntity(DriverRequestDTO driver) {
     	return Driver.builder()
     			     .firstName(driver.getFirstName())
@@ -160,9 +163,44 @@ public class DriverServiceImpl implements DriverService {
 	            .build();
 	}
 
+
+	@Override
+	public void registerTempDriver(DriverRequestDTO request) {
+		OtpStore.tempDriver.put(request.getEmail(), request);
+		otpService.generateAndSendOtp(request.getEmail());
+		
+		
+	}
+
+	@Override
+	public void saveDriverIfOtpVerified(String email) {
+		DriverRequestDTO driverRequestDTO = OtpStore.tempDriver.get(email);
+		if (driverRequestDTO != null) {
+			Driver driver = Driver.builder()
+					.firstName(driverRequestDTO.getFirstName())
+					.lastName(driverRequestDTO.getLastName())
+					.username(driverRequestDTO.getUsername())
+					.email(driverRequestDTO.getEmail())
+					.phoneNumber(driverRequestDTO.getPhoneNumber())
+					.role(Role.DRIVER)
+					.status(UserStatus.ACTIVE)
+					.licenseNumber(driverRequestDTO.getLicenseNumber())
+					.password(passwordEncoder.encode(driverRequestDTO.getPassword())) // Hash the password
+					.createdAt(LocalDateTime.now())
+					.build();
+			
+			if (driverRequestDTO.getVehicleId() != null) {
+				Vehicle vehicle = vehicleRepository.findById(driverRequestDTO.getVehicleId())
+						.orElseThrow(() -> new RuntimeException("Vehicle not found"));
+				driver.setCurrentVehicle(vehicle);
+			}
+			
+			driverRepository.save(driver);
+			OtpStore.tempDriver.remove(email); // Clear the temporary driver after saving
+		}
+		
+	}
     
-    
-	
-	
+
 }
 

@@ -21,23 +21,27 @@ import com.cdac.acts.logistics_v1.repository.DeliveryOrderRepository;
 import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
 import com.cdac.acts.logistics_v1.service.CustomerService;
 
+import com.cdac.acts.logistics_v1.utilities.OtpStore;
+
+
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
+
 	
 	private final DeliveryOrderRepository deliveryOrderRepository;
 	
     private final CustomerRepository customerRepository;
 
-    
     private final ShipmentRepository shipmentRepository;
 
-    
     private final PasswordEncoder passwordEncoder;
 
+    private final OtpServiceImpl otpService;
+  
     @Override
     public CustomerResponseDTO createCustomer(CustomerRequestDTO dto) {
         Customer customer = Customer.builder()
@@ -63,6 +67,7 @@ public class CustomerServiceImpl implements CustomerService {
         Customer saved = customerRepository.save(customer);
         return mapToDTO(saved);
     }
+
 
     @Override
     public CustomerResponseDTO getCustomerById(Long id) {
@@ -151,6 +156,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
     }
 
+
     @Override
     public CustomerDashboardDTO getCustomerDashboard(Long customerId) {
         Long totalOrders = deliveryOrderRepository.countByPlacedBy_UserId(customerId);
@@ -160,6 +166,42 @@ public class CustomerServiceImpl implements CustomerService {
                 .totalOrders(totalOrders)
                 .totalSpent(totalSpent != null ? totalSpent : 0.0)
                 .build();
+    }
+
+    // Registration-related methods
+    @Override
+    public void registerTempCustomer(CustomerRequestDTO request) {
+        OtpStore.tempUsers.put(request.getEmail(), request);
+        otpService.generateAndSendOtp(request.getEmail());
+    }
+
+    @Override
+    public void saveCustomerIfOtpVerified(String email) {
+        CustomerRequestDTO request = OtpStore.tempUsers.get(email);
+        if (request != null) {
+            Customer customer = Customer.builder()
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .username(request.getUsername())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .phoneNumber(request.getPhoneNumber())
+                    .role(com.cdac.acts.logistics_v1.enums.Role.CUSTOMER)
+                    .status(com.cdac.acts.logistics_v1.enums.UserStatus.ACTIVE)
+                    .onboardingDate(LocalDateTime.now())
+                    .companyName(request.getCompanyName())
+                    .gstNumber(request.getGstNumber())
+                    .panNumber(request.getPanNumber())
+                    .industryType(request.getIndustryType())
+                    .companyAddress(request.getCompanyAddress())
+                    .contactPersonName(request.getContactPersonName())
+                    .contactPersonPhone(request.getContactPersonPhone())
+                    .companyEmail(request.getCompanyEmail())
+                    .build();
+
+            customerRepository.save(customer);
+            OtpStore.tempUsers.remove(email); // Clear the temporary user after saving
+        }
     }
 
 }

@@ -2,7 +2,9 @@ package com.cdac.acts.logistics_v1.service;
 
 import java.util.List;
 
+
 import com.cdac.acts.logistics_v1.dto.AdminDashboardDTO;
+
 import com.cdac.acts.logistics_v1.dto.AuthRequestDTO;
 import com.cdac.acts.logistics_v1.dto.AuthResponseDTO;
 import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
@@ -21,4 +23,5 @@ public interface UserService {
     AdminDashboardDTO getAdminDashboard();
     List<UserResponseDTO> findUsersByRole(String role);
     
+
 }

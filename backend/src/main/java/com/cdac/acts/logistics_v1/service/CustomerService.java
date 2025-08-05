@@ -8,7 +8,7 @@ import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
 import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
 
 public interface CustomerService {
-    CustomerResponseDTO createCustomer(CustomerRequestDTO request);
+//    CustomerResponseDTO createCustomer(CustomerRequestDTO request);
     CustomerResponseDTO getCustomerById(Long id);
     List<CustomerResponseDTO> getAllCustomers();
     CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO request);
@@ -18,4 +18,8 @@ public interface CustomerService {
     List<ShipmentResponseDTO> getCustomerShipments(Long customerId);
     CustomerDashboardDTO getCustomerDashboard(Long customerId);
     
+  //Registration
+    void registerTempCustomer(CustomerRequestDTO request);
+    void saveCustomerIfOtpVerified(String email);
+
 }

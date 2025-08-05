@@ -1,0 +1,73 @@
+/* Signup.css */
+
+.signup-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+/* FORM SIDE */
+.signup-form-side {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f4f6f8;
+  padding: 2rem;
+  min-width: 320px;
+  box-sizing: border-box;
+}
+
+/* IMAGE SIDE */
+.signup-image-side {
+  flex: 1;
+  background-image: url('http:///localhost:3001/images/20945966.jpg'); /* Better: relative to /public folder */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  min-width: 320px;
+}
+
+/* Dark overlay */
+.signup-image-side::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  top: 0;
+  left: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .signup-container {
+    flex-direction: column;
+  }
+
+  .signup-image-side {
+    height: 250px; /* Shorter image on mobile */
+    min-height: 250px;
+  }
+
+  .signup-form-side {
+    height: auto;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .signup-form-side {
+    padding: 1rem;
+  }
+
+  .signup-form-side form {
+    width: 100%;
+  }
+}

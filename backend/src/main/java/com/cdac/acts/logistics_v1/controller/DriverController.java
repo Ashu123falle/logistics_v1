@@ -1,5 +1,6 @@
 package com.cdac.acts.logistics_v1.controller;
 
+
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class DriverController {
 
     private final DriverService driverService;
-
+    private final OtpService otpService;
     // Create driver
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -93,5 +100,30 @@ public class DriverController {
         return ResponseEntity.ok(updated);
         
     }
-    
+	
+// 	@GetMapping("/{id}")
+// 	public ResponseEntity<DriverResponseDTO> getDriverById(@PathVariable Long id) {
+// 		DriverResponseDTO driver = driverService.getDriverById(id);
+// 		return driver != null 
+// 		? ResponseEntity.ok(driver)
+// 	            : ResponseEntity.notFound().build();
+// 	}
+	
+	 @PostMapping("register-driver")
+	    public ResponseEntity<String> register(@RequestBody DriverRequestDTO request) {
+		 driverService.registerTempDriver(request);
+	        return ResponseEntity.ok("OTP sent to email");
+	    }
+
+	    @PostMapping("verify-driver-otp")
+	    public ResponseEntity<String> verifyOtp(@RequestBody OtpVerificationRequest otpRequest) {
+	        boolean isValid = otpService.verifyOtp(otpRequest.getEmail(), otpRequest.getOtp());
+	        if (isValid) {
+	        	driverService.saveDriverIfOtpVerified(otpRequest.getEmail());
+	            return ResponseEntity.ok("Registration successful");
+	        }
+	        return ResponseEntity.badRequest().body("Invalid or expired OTP");
+	    }
+
+
 }

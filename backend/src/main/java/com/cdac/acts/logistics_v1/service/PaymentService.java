@@ -13,6 +13,7 @@ public interface PaymentService {
 
 	PaymentResponseDTO getPaymentById(Long id);
 	List<PaymentResponseDTO> getPaymentByCustomerId(Long id);
+
     List<PaymentResponseDTO> getAllPayments();
     
     PaymentResponseDTO updatePayment(Long id, PaymentRequestDTO request);

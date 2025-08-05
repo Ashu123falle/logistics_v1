@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,7 +13,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 import com.cdac.acts.logistics_v1.dto.AdminDashboardDTO;
+
 import com.cdac.acts.logistics_v1.dto.AuthRequestDTO;
 import com.cdac.acts.logistics_v1.dto.AuthResponseDTO;
 import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
@@ -32,9 +36,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-	private final AuthenticationManager authenticationManager;
 
-	private final JwtUtil jwtUtil;
+	  private final AuthenticationManager authenticationManager;
+
+	  private final JwtUtil jwtUtil;
 	
     private final PasswordEncoder passwordEncoder;
 
@@ -172,6 +177,5 @@ public class UserServiceImpl implements UserService {
                 .totalRevenue(totalRevenue != null ? totalRevenue : 0.0)
                 .build();
     }
-
 
 }

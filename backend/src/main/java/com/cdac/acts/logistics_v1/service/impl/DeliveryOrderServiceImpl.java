@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import com.cdac.acts.logistics_v1.dto.DeliveryOrderRequestDTO;
 import com.cdac.acts.logistics_v1.dto.DeliveryOrderResponseDTO;
 import com.cdac.acts.logistics_v1.enums.DeliveryStatus;
 import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
+import com.cdac.acts.logistics_v1.model.Customer;
 import com.cdac.acts.logistics_v1.model.DeliveryOrder;
 import com.cdac.acts.logistics_v1.model.Driver;
 import com.cdac.acts.logistics_v1.model.Route;
@@ -21,6 +23,7 @@ import com.cdac.acts.logistics_v1.repository.DriverRepository;
 import com.cdac.acts.logistics_v1.repository.RouteRepository;
 import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
 import com.cdac.acts.logistics_v1.service.DeliveryOrderService;
+import com.cdac.acts.logistics_v1.service.EmailService;
 
 @Service
 @Transactional
@@ -31,6 +34,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     private final ShipmentRepository shipmentRepository;
     private final RouteRepository routeRepository;
     private final DriverRepository driverRepository;
+    
+    
+    @Autowired
+    private EmailService emailService;
 
     public DeliveryOrderServiceImpl(
             DeliveryOrderRepository deliveryOrderRepository,
@@ -44,6 +51,29 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         this.driverRepository = driverRepository;
     }
 
+    
+    private void sendOrderConfirmationEmail(DeliveryOrder order) {
+        Customer customer = order.getShipment().getCustomer();
+        String to = customer.getCompanyEmail();
+        String subject = "Order Confirmation - Order ID: " + order.getId();
+
+        String text = "Dear " + customer.getContactPersonName() + ",\n\n"
+            + "Your order has been successfully placed. Please find the details below:\n\n"
+            + "Order ID       : " + order.getId() + "\n"
+            + "Status         : " + order.getStatus().name() + "\n"
+            + "Pickup Date    : " + order.getScheduledPickupDate() + "\n"
+            + "Driver Name    : " + order.getAssignedDriver().getFirstName() + " "+order.getAssignedDriver().getLastName()+"\n"
+            + "Contact Number : " + order.getAssignedDriver().getPhoneNumber() + "\n"
+            + "Vehicle Number : " + order.getAssignedDriver().getCurrentVehicle().getRegistrationNumber() + "\n"
+            + "Cost           : ₹" + order.getCost() + "\n\n"
+            + "Thank you for choosing MoveBiz.\n\n"
+            + "Best regards,\n"
+            + "Team MoveBiz";
+
+        emailService.sendSimpleEmail(to, subject, text);
+    }
+
+    
     @Override
     public DeliveryOrderResponseDTO createOrder(DeliveryOrderRequestDTO request) {
         Shipment shipment = shipmentRepository.findById(request.getShipmentId())
@@ -60,12 +90,13 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
                 .route(route)
                 .assignedDriver(driver)
                 .cost(request.getCost())
-                .status(DeliveryStatus.valueOf(request.getStatus()))
+                .status(DeliveryStatus.CONFIRMED)
                 .scheduledPickupDate(request.getScheduledPickupDate())
                 .notes(request.getNotes())
                 .createdAt(LocalDateTime.now())
                 .build();
-
+        order = deliveryOrderRepository.save(order);
+        sendOrderConfirmationEmail(order);
         return mapToResponse(deliveryOrderRepository.save(order));
     }
 
@@ -106,9 +137,13 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         order.setScheduledPickupDate(request.getScheduledPickupDate());
         order.setScheduledDeliveryDate(request.getScheduledDeliveredDate());
         order.setNotes(request.getNotes());
+        
 
         return mapToResponse(deliveryOrderRepository.save(order));
     }
+    
+   
+
 
     @Override
     public void deleteOrder(Long id) {

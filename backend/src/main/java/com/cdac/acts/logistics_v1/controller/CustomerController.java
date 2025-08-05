@@ -1,9 +1,9 @@
 package com.cdac.acts.logistics_v1.controller;
 
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,7 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cdac.acts.logistics_v1.dto.CustomerDashboardDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
+import com.cdac.acts.logistics_v1.dto.OtpVerificationRequest;
+import com.cdac.acts.logistics_v1.model.Customer;
+import com.cdac.acts.logistics_v1.repository.CustomerRepository;
 import com.cdac.acts.logistics_v1.service.CustomerService;
+import com.cdac.acts.logistics_v1.service.OtpService;
 import com.cdac.acts.logistics_v1.utilities.JwtUtil;
 
 @RestController
@@ -29,7 +33,12 @@ public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
-	private JwtUtil jwtUtil;	
+
+    @Autowired
+    private OtpService otpService;
+    
+    @Autowired
+	  private JwtUtil jwtUtil;	
 
    
     @PostMapping
@@ -61,9 +70,10 @@ public class CustomerController {
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize) {
 
-        List<CustomerResponseDTO> customers = customerService.getAllCustomers(); // You can add pagination later
+        List<CustomerResponseDTO> customers = customerService.getAllCustomers(); // Add pagination later if needed
         return ResponseEntity.ok(customers);
     }
+
 
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
     @GetMapping("/{id}")
@@ -73,6 +83,7 @@ public class CustomerController {
             ? ResponseEntity.ok(customer)
             : ResponseEntity.notFound().build();
     }
+
     // dashboard by id
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/dashboard/{customerId}")
@@ -89,5 +100,20 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getCustomerDashboard(customerId));
     }
 
+    @PostMapping("register-customer")
+    public ResponseEntity<String> register(@RequestBody CustomerRequestDTO request) {
+        customerService.registerTempCustomer(request);
+        return ResponseEntity.ok("OTP sent to email");
+    }
+
+    @PostMapping("verify-customer-otp")
+    public ResponseEntity<String> verifyOtp(@RequestBody OtpVerificationRequest otpRequest) {
+        boolean isValid = otpService.verifyOtp(otpRequest.getEmail(), otpRequest.getOtp());
+        if (isValid) {
+            customerService.saveCustomerIfOtpVerified(otpRequest.getEmail());
+            return ResponseEntity.ok("Registration successful");
+        }
+        return ResponseEntity.badRequest().body("Invalid or expired OTP");
+    }
 
 }

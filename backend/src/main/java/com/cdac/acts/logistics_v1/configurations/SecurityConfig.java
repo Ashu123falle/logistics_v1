@@ -42,6 +42,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/auth/**").permitAll()
+
                         .requestMatchers("/api/user/**").hasRole("ADMIN")
                         
                         .requestMatchers(HttpMethod.POST, "/api/customers").permitAll()
@@ -58,8 +59,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/shipments/**").hasAnyRole("CUSTOMER","ADMIN","DRIVER")
                    
                         .requestMatchers("/api/vehicles/**").hasAnyRole("DRIVER","ADMIN")
-                        
-                        
+                                       
                         .anyRequest().authenticated())
                 .sessionManagement(management -> management
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -94,7 +94,9 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         
+
         config.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://127.0.0.1:5500" ,"http://localhost:5173","https://logistics-v1.vercel.app/")); 
+
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
