@@ -12,7 +12,9 @@ public interface PaymentService {
 	String verifyTransaction(Map<String, String> payload);
 
 	PaymentResponseDTO getPaymentById(Long id);
+	List<PaymentResponseDTO> getPaymentByCustomerId(Long id);
     List<PaymentResponseDTO> getAllPayments();
+    
     PaymentResponseDTO updatePayment(Long id, PaymentRequestDTO request);
     void deletePayment(Long id);
 

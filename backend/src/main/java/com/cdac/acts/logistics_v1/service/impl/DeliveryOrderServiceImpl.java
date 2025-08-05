@@ -104,6 +104,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         order.setCost(request.getCost());
         order.setStatus(DeliveryStatus.valueOf(request.getStatus()));
         order.setScheduledPickupDate(request.getScheduledPickupDate());
+        order.setScheduledDeliveryDate(request.getScheduledDeliveredDate());
         order.setNotes(request.getNotes());
 
         return mapToResponse(deliveryOrderRepository.save(order));

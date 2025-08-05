@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.cdac.acts.logistics_v1.dto.CustomerDashboardDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
 import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
@@ -16,6 +17,7 @@ import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
 import com.cdac.acts.logistics_v1.model.Customer;
 import com.cdac.acts.logistics_v1.model.Shipment;
 import com.cdac.acts.logistics_v1.repository.CustomerRepository;
+import com.cdac.acts.logistics_v1.repository.DeliveryOrderRepository;
 import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
 import com.cdac.acts.logistics_v1.service.CustomerService;
 
@@ -25,13 +27,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
-    @Autowired
+	
+	private final DeliveryOrderRepository deliveryOrderRepository;
+	
     private final CustomerRepository customerRepository;
 
-    @Autowired
+    
     private final ShipmentRepository shipmentRepository;
 
-    @Autowired
+    
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -146,4 +150,16 @@ public class CustomerServiceImpl implements CustomerService {
                 .companyEmail(customer.getCompanyEmail())
                 .build();
     }
+
+    @Override
+    public CustomerDashboardDTO getCustomerDashboard(Long customerId) {
+        Long totalOrders = deliveryOrderRepository.countByPlacedBy_UserId(customerId);
+        Double totalSpent = deliveryOrderRepository.sumTotalCostByPlacedByUserId(customerId);
+
+        return CustomerDashboardDTO.builder()
+                .totalOrders(totalOrders)
+                .totalSpent(totalSpent != null ? totalSpent : 0.0)
+                .build();
+    }
+
 }
