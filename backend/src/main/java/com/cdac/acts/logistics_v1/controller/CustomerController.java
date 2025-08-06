@@ -28,7 +28,7 @@ import com.cdac.acts.logistics_v1.service.OtpService;
 import com.cdac.acts.logistics_v1.utilities.JwtUtil;
 
 @RestController
-@RequestMapping("/api/customers")
+@RequestMapping("/api/customer")
 public class CustomerController {
 
     @Autowired
