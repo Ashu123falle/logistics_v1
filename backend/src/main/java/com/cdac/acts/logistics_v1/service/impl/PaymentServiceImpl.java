@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
 //import javax.crypto.Mac;
 //import javax.crypto.spec.SecretKeySpec;
 
@@ -111,6 +112,8 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+  // Custom hash function for verifying payment but razorpay has its own verifier so not needed right now
+  
 //    private String hmacSHA256(String data, String secret) {
 //        try {
 //            Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
@@ -188,6 +191,7 @@ public class PaymentServiceImpl implements PaymentService {
         	    .collect(Collectors.toList());
 
     }
+
 
 
 }

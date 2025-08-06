@@ -1,0 +1,113 @@
+/* Main layout as flex row on large screens */
+.login-layout {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+/* Left side image container */
+.login-image {
+  flex: 1;
+  background-image: url('http://localhost:3000/images/Login.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+/* Dark overlay */
+.login-image::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+/* If you add any content inside .login-image */
+.login-image > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Form wrapper section */
+.form-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  background-color: #ffffff;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Actual card/container */
+.form-wrapper .card {
+  width: 100%;
+  max-width: 450px;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 30px 25px;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 991.98px) {
+  .login-layout {
+    flex-direction: column;
+  }
+
+  .login-image {
+    height: 40vh;
+  }
+
+  .form-wrapper {
+    min-height: auto;
+    padding: 30px 15px;
+  }
+
+  .form-wrapper .card {
+    max-width: 100%;
+    padding: 25px 20px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .login-image {
+    display: none;
+  }
+
+  .form-wrapper {
+    background-image: url('http://localhost:3000/images/Login.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+  }
+
+  .form-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+  }
+
+  .form-wrapper > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  .form-wrapper .card {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px 15px;
+  }
+}
