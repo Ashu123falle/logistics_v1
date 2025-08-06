@@ -22,9 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cdac.acts.logistics_v1.dto.DriverLocationRequestDTO;
 import com.cdac.acts.logistics_v1.dto.DriverLocationResponseDTO;
+import com.cdac.acts.logistics_v1.dto.OtpVerificationRequest;
 import com.cdac.acts.logistics_v1.dto.DriverRequestDTO;
 import com.cdac.acts.logistics_v1.dto.DriverResponseDTO;
 import com.cdac.acts.logistics_v1.service.DriverService;
+import com.cdac.acts.logistics_v1.service.OtpService;
 
 import lombok.RequiredArgsConstructor;
 
