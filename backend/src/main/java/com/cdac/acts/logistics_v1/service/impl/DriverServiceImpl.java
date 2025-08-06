@@ -5,13 +5,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cdac.acts.logistics_v1.dto.DriverLocationRequestDTO;
 import com.cdac.acts.logistics_v1.dto.DriverLocationResponseDTO;
 import com.cdac.acts.logistics_v1.dto.DriverRequestDTO;
 import com.cdac.acts.logistics_v1.dto.DriverResponseDTO;
-import com.cdac.acts.logistics_v1.dto.VehicleBasicDTO;
 import com.cdac.acts.logistics_v1.enums.Role;
 import com.cdac.acts.logistics_v1.enums.UserStatus;
 import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
@@ -38,6 +38,8 @@ public class DriverServiceImpl implements DriverService {
     
     private final OtpServiceImpl otpService;
   
+    private final PasswordEncoder passwordEncoder;
+    
     private DriverResponseDTO mapToResponseDTO(Driver driver) {
         return DriverResponseDTO.builder()
         		.userId(driver.getUserId())
@@ -69,7 +71,6 @@ public class DriverServiceImpl implements DriverService {
     
 	@Override
 	public DriverResponseDTO createDriver(DriverRequestDTO request) {
-		
 		Driver newDriver = mapToEntity(request);
 		newDriver.setCreatedAt(LocalDateTime.now());
 		

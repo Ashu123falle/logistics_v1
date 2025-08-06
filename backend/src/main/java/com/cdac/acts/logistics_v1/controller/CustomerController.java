@@ -43,7 +43,7 @@ public class CustomerController {
    
     @PostMapping
     public ResponseEntity<String> createCustomer(@RequestBody CustomerRequestDTO customerDTO) {
-        customerService.createCustomer(customerDTO);
+        customerService.register(customerDTO);
         return ResponseEntity.status(201).body("Customer created successfully.");
     }
 
