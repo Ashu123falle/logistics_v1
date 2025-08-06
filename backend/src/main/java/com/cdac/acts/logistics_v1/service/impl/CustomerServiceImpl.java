@@ -171,6 +171,7 @@ public class CustomerServiceImpl implements CustomerService {
     // Registration-related methods
     @Override
     public void registerTempCustomer(CustomerRequestDTO request) {
+    	
         OtpStore.tempUsers.put(request.getEmail(), request);
         otpService.generateAndSendOtp(request.getEmail());
     }
@@ -189,6 +190,7 @@ public class CustomerServiceImpl implements CustomerService {
                     .role(com.cdac.acts.logistics_v1.enums.Role.CUSTOMER)
                     .status(com.cdac.acts.logistics_v1.enums.UserStatus.ACTIVE)
                     .onboardingDate(LocalDateTime.now())
+                    .createdAt(LocalDateTime.now())
                     .companyName(request.getCompanyName())
                     .gstNumber(request.getGstNumber())
                     .panNumber(request.getPanNumber())
