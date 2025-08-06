@@ -102,7 +102,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         
 
-        config.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://127.0.0.1:5500" ,"http://localhost:5173","https://logistics-v1.vercel.app/")); 
+        config.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://127.0.0.1:5500" ,"http://localhost:5173","http://localhost:5174","https://logistics-v1.vercel.app/")); 
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
