@@ -8,7 +8,7 @@ import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
 import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
 
 public interface CustomerService {
-//    CustomerResponseDTO createCustomer(CustomerRequestDTO request);
+    CustomerResponseDTO register(CustomerRequestDTO request);
     CustomerResponseDTO getCustomerById(Long id);
     List<CustomerResponseDTO> getAllCustomers();
     CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO request);

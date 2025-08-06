@@ -41,6 +41,13 @@ public class SecurityConfig {
         		.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests
+                		
+                		.requestMatchers(HttpMethod.POST, "/api/customer/register-customer").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/customer/verify-customer-otp").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/driver/register-driver").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/driver/verify-driver-otp").permitAll()
+
+                		
                         .requestMatchers("/api/auth/**").permitAll()
 
                         .requestMatchers("/api/user/**").hasRole("ADMIN")

@@ -43,8 +43,8 @@ public class CustomerServiceImpl implements CustomerService {
     private final OtpServiceImpl otpService;
   
     @Override
-    public CustomerResponseDTO createCustomer(CustomerRequestDTO dto) {
-        Customer customer = Customer.builder()
+    public CustomerResponseDTO register(CustomerRequestDTO dto) {
+    Customer customer = Customer.builder()
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
                 .username(dto.getUsername())
