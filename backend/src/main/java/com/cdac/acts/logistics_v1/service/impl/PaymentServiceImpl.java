@@ -1,9 +1,12 @@
 package com.cdac.acts.logistics_v1.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 
 //import javax.crypto.Mac;
 //import javax.crypto.spec.SecretKeySpec;
@@ -27,6 +30,7 @@ import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import com.razorpay.Utils;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -108,6 +112,8 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+  // Custom hash function for verifying payment but razorpay has its own verifier so not needed right now
+  
 //    private String hmacSHA256(String data, String secret) {
 //        try {
 //            Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
@@ -170,7 +176,22 @@ public class PaymentServiceImpl implements PaymentService {
                 p.getAmountPaid(),
                 p.getMethod(),
                 p.getStatus() != null ? p.getStatus().name() : null,
-                p.getRazorpayPaymentId()
+                p.getRazorpayPaymentId(),
+                p.getPaymentDate()
         );
     }
+
+    @Override
+    public List<PaymentResponseDTO> getPaymentByCustomerId(Long id) {
+        List<Payment> payments = paymentRepository.findByPaidByUserId(id);
+
+        return payments.stream()
+        	    .sorted(Comparator.comparing(Payment::getPaymentDate).reversed())
+        	    .map(this::toDTO)
+        	    .collect(Collectors.toList());
+
+    }
+
+
+
 }

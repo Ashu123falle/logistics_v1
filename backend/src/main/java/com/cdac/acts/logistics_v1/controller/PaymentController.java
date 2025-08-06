@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/payment")
-@CrossOrigin("*")
 @RequiredArgsConstructor
 
 public class PaymentController {
@@ -65,5 +64,15 @@ public class PaymentController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         paymentService.deletePayment(id);
         return ResponseEntity.noContent().build();
+
     }
+    
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<PaymentResponseDTO>> getPaymentsByCustomer(@PathVariable Long customerId) {
+        List<PaymentResponseDTO> payments = paymentService.getPaymentByCustomerId(customerId);
+        return ResponseEntity.ok(payments);
+
+    }
+    
 }

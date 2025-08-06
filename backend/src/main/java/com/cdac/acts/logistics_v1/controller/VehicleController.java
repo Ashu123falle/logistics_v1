@@ -12,24 +12,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/vehicles")
-@CrossOrigin("*")
 @RequiredArgsConstructor
 public class VehicleController {
 
     private final VehicleService vehicleService;
 
-    /**
-     * Create a new vehicle
-     */
     @PostMapping
     public ResponseEntity<VehicleResponseDTO> createVehicle(@RequestBody VehicleRequestDTO vehicleDTO) {
         VehicleResponseDTO createdVehicle = vehicleService.createVehicle(vehicleDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdVehicle);
     }
 
-    /**
-     * Update an existing vehicle by ID
-     */
+    
     @PutMapping("/{id}")
     public ResponseEntity<VehicleResponseDTO> updateVehicle(
             @PathVariable Long id,
@@ -39,18 +33,14 @@ public class VehicleController {
         return ResponseEntity.ok(updatedVehicle);
     }
 
-    /**
-     * Delete vehicle by ID
-     */
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
         vehicleService.deleteVehicle(id);
         return ResponseEntity.noContent().build(); 
     }
 
-    /**
-     * Get vehicle by ID
-     */
+    
     @GetMapping("/{id}")
     public ResponseEntity<VehicleResponseDTO> getVehicleById(@PathVariable Long id) {
         VehicleResponseDTO vehicle = vehicleService.getVehicleById(id);

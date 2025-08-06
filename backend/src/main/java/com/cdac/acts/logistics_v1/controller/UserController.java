@@ -1,16 +1,9 @@
 package com.cdac.acts.logistics_v1.controller;
 
-import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
-import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
-import com.cdac.acts.logistics_v1.service.UserService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cdac.acts.logistics_v1.dto.AdminDashboardDTO;
 import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
 import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
 import com.cdac.acts.logistics_v1.service.UserService;
@@ -35,7 +29,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<String> addUser( @RequestBody UserRequestDTO userDTO) {
-        userService.createUser(userDTO);
+        userService.register(userDTO);
         return ResponseEntity.ok("User created successfully.");
     }
 
@@ -66,5 +60,10 @@ public class UserController {
         return user != null
                 ? ResponseEntity.ok(user)
                 : ResponseEntity.notFound().build();
+    }
+    
+    @GetMapping("/dashboard")
+    public ResponseEntity<AdminDashboardDTO> getDashboard() {
+        return ResponseEntity.ok(userService.getAdminDashboard());
     }
 }

@@ -12,6 +12,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class DriverResponseDTO extends UserResponseDTO {
+	
     private String licenseNumber;
     private Vehicle vehicle; // Optional DTO to avoid circular references
 }

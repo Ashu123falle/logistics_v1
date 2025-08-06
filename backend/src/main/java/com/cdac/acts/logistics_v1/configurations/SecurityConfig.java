@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -40,13 +41,36 @@ public class SecurityConfig {
         		.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests
+                		.requestMatchers("/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html").permitAll()
+                                       
+                		.requestMatchers("/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html").permitAll()
+
+
+                		.requestMatchers(HttpMethod.POST, "/api/customer/register-customer").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/customer/verify-customer-otp").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/driver/register-driver").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/driver/verify-driver-otp").permitAll()
+
+                		
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/driver/**").hasAnyRole("DRIVER","ADMIN")
-                        .requestMatchers("/api/customer/**").permitAll()
+
+                        .requestMatchers("/api/user/**").hasRole("ADMIN")
+                        
+                        .requestMatchers(HttpMethod.POST, "/api/customers").permitAll()
+                        .requestMatchers("/api/customer/**").hasAnyRole("CUSTOMER", "ADMIN")
+
+                        .requestMatchers("/api/delivery-orders/**").hasAnyRole("CUSTOMER","ADMIN","DRIVER")
+
+                        .requestMatchers(HttpMethod.POST, "/api/drivers").permitAll()
+                        .requestMatchers("/api/drivers/**").hasAnyRole("DRIVER","ADMIN")
+                        
+                        
                         .requestMatchers("/api/payment/**").hasAnyRole("CUSTOMER","ADMIN")
-//                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
-//                        .requestMatchers("/api/payment/**").hasAnyRole("CUSTOMER","ADMIN")
+                        
+                        .requestMatchers("/api/shipments/**").hasAnyRole("CUSTOMER","ADMIN","DRIVER")
+                   
+                        .requestMatchers("/api/vehicles/**").hasAnyRole("DRIVER","ADMIN")
+                                       
                         .anyRequest().authenticated())
                 .sessionManagement(management -> management
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -81,7 +105,9 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         
-        config.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://127.0.0.1:5500" , "content://","http://localhost:5173/")); 
+
+        config.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://127.0.0.1:5500" ,"http://localhost:5173","http://localhost:5174","https://logistics-v1.vercel.app/")); 
+
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
