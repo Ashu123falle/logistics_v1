@@ -11,19 +11,67 @@ import {
   InputAdornment,
   IconButton,
   Link,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import './User.css';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; // adjust path if needed
+import { jwtDecode } from "jwt-decode"; 
+
 
 const User = () => {
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+  const { setAuth } = useAuth();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log({ emailOrPhone, password, rememberMe });
+
+    try {
+      const response = await axios.post("http://localhost:8080/api/auth/login", {
+        username: emailOrPhone,
+        password,
+      });
+
+      const token = response.data.token;
+      const decoded = jwtDecode(token);
+
+      const storage = rememberMe ? localStorage : sessionStorage;
+      storage.setItem("token", token);
+
+      setAuth({
+        isAuthenticated: true,
+        token,
+        userId: decoded.userId,
+        role: decoded.authorities,
+      });
+
+      // Redirect based on role
+      switch (decoded.authorities) {
+        case "ROLE_ADMIN":
+          navigate("/admin");
+          break;
+        case "ROLE_DRIVER":
+          navigate("/driver");
+          break;
+        case "ROLE_CUSTOMER":
+          navigate("/customer/dashboard");
+          break;
+        default:
+          navigate("/");
+      }
+    } catch (error) {
+      console.error(error);
+      setSnackbar({ open: true, message: "Login failed. Please try again.", severity: "error" });
+    }
   };
 
   return (
@@ -104,13 +152,24 @@ const User = () => {
 
             <Typography variant="body2" align="center" color="text.secondary">
               Don’t have an account?{' '}
-              <Link href="#" color="success" fontWeight={600} underline="hover">
+              <Link href="/signup" color="success" fontWeight={600} underline="hover">
                 Get Started
               </Link>
             </Typography>
           </Box>
         </Paper>
       </Grid>
+
+      {/* Snackbar for errors */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Grid>
   );
 };
