@@ -42,6 +42,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests
                 		.requestMatchers("/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html").permitAll()
+                                       
+                		.requestMatchers("/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html").permitAll()
+
+
                 		.requestMatchers(HttpMethod.POST, "/api/customer/register-customer").permitAll()
                 		.requestMatchers(HttpMethod.POST, "/api/customer/verify-customer-otp").permitAll()
                 		.requestMatchers(HttpMethod.POST, "/api/driver/register-driver").permitAll()
