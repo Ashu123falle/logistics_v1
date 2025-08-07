@@ -23,6 +23,7 @@ import { jwtDecode } from "jwt-decode";
 import Navbar from '../Navbar';
 
 
+
 const User = () => {
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -39,16 +40,17 @@ const User = () => {
     try {
       const response = await axios.post("http://localhost:8080/api/auth/login", {
       // const response = await axios.post("https://logistics-v1.onrender.com/api/auth/login", {
+
         username: emailOrPhone,
         password,
       });
 
       const token = response.data.token;
       const decoded = jwtDecode(token);
-      console.log(decoded);
-      
-      // const storage = rememberMe ? localStorage : sessionStorage;
-      localStorage.setItem("token", token);
+
+      const storage = rememberMe ? localStorage : sessionStorage;
+      storage.setItem("token", token);
+
 
       setAuth({
         isAuthenticated: true,
@@ -171,6 +173,7 @@ const User = () => {
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
         >
+
         <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}
         </Alert>
