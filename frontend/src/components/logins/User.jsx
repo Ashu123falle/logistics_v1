@@ -20,6 +20,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext'; // adjust path if needed
 import { jwtDecode } from "jwt-decode"; 
+import Navbar from '../Navbar';
+
 
 
 const User = () => {
@@ -37,6 +39,8 @@ const User = () => {
 
     try {
       const response = await axios.post("http://localhost:8080/api/auth/login", {
+      // const response = await axios.post("https://logistics-v1.onrender.com/api/auth/login", {
+
         username: emailOrPhone,
         password,
       });
@@ -46,6 +50,7 @@ const User = () => {
 
       const storage = rememberMe ? localStorage : sessionStorage;
       storage.setItem("token", token);
+
 
       setAuth({
         isAuthenticated: true,
@@ -75,6 +80,8 @@ const User = () => {
   };
 
   return (
+    <>
+    <Navbar/>
     <Grid container className="login-layout">
       {/* LEFT - Image */}
       <Grid item md={6} className="login-image" />
@@ -102,14 +109,14 @@ const User = () => {
 
           <Box component="form" onSubmit={handleSubmit}>
             <TextField
-              label="Email or Phone Number"
+              label="username"
               variant="outlined"
               fullWidth
               margin="normal"
               value={emailOrPhone}
               onChange={(e) => setEmailOrPhone(e.target.value)}
               required
-            />
+              />
 
             <TextField
               label="Password"
@@ -129,7 +136,7 @@ const User = () => {
                   </InputAdornment>
                 ),
               }}
-            />
+              />
 
             <Grid container alignItems="center" justifyContent="space-between" mt={1} mb={2}>
               <FormControlLabel
@@ -165,12 +172,14 @@ const User = () => {
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
+        >
+
         <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}
         </Alert>
       </Snackbar>
     </Grid>
+        </>
   );
 };
 

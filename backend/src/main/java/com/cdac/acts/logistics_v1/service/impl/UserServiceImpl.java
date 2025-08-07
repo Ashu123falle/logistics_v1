@@ -146,7 +146,7 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(() -> new RuntimeException("User not found"));
 
                 String token = jwtUtil.generateToken(userDetails); // or jwtUtil.generateToken(user)
-
+                 System.out.println(user.toString());
                 return AuthResponseDTO.builder()
                         .token(token)
                         .message("Login successful")

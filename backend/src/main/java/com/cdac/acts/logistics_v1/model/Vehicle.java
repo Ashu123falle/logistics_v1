@@ -31,7 +31,10 @@ public class Vehicle {
 
     private Boolean isAvailable;
 
-    @JsonManagedReference
     @OneToMany(mappedBy = "currentVehicle")
+    @JsonManagedReference
     private List<Driver> assignedDrivers;
+    
+
+
 }

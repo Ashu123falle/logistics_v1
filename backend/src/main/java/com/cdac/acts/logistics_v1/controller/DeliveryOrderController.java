@@ -1,12 +1,15 @@
 package com.cdac.acts.logistics_v1.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/delivery-orders")
 @RequiredArgsConstructor
+//@CrossOrigin(origins = "*", allowedHeaders = "*") // TEMP for debug
 public class DeliveryOrderController {
 
     private final DeliveryOrderService deliveryOrderService;
@@ -103,4 +107,16 @@ public class DeliveryOrderController {
         List<DeliveryOrderResponseDTO> orders = deliveryOrderService.getOrdersByDriverId(driverId);
         return ResponseEntity.ok(orders);
     }
+    
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DRIVER')")
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<DeliveryOrderResponseDTO> updateStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload) {
+
+        String newStatus = payload.get("status");
+        DeliveryOrderResponseDTO updatedOrder = deliveryOrderService.updateStatus(id, newStatus);
+        return ResponseEntity.ok(updatedOrder);
+    }
+
 }

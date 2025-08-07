@@ -5,6 +5,10 @@ import CustomerRoutes from "./routes/CustomerRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
 
 function App() {
+  const { loading } = useAuth();
+  
+  if (loading) return <div>Loading...</div>;
+
   return (
     
       <Routes>

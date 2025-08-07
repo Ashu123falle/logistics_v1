@@ -8,13 +8,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Data
+//@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
@@ -28,5 +30,14 @@ public class Driver extends User {
     @JoinColumn(name = "vehicle_id")
     @JsonBackReference
     private Vehicle currentVehicle;
+    @Override
+    public String toString() {
+        return "Driver{" +
+                "id=" + getUserId() +
+                ", licenseNumber='" + licenseNumber + '\'' +
+                // Avoid calling currentVehicle.toString()
+                ", currentVehicleId=" + (currentVehicle != null ? currentVehicle.getId() : null) +
+                '}';
+    }
 }
 

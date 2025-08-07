@@ -43,6 +43,7 @@ const Signup = () => {
     };
 
     try {
+
       const res = await fetch("http://localhost:8080/api/customer/register-customer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -69,6 +70,7 @@ const Signup = () => {
     setLoading(true);
 
     try {
+
       const res = await fetch("http://localhost:8080/api/customer/verify-customer-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
