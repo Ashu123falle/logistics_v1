@@ -172,6 +172,11 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void registerTempCustomer(CustomerRequestDTO request) {
     	
+    	if(customerRepository.existsByEmail(request.getEmail()) || customerRepository.getCustomerByUsername(request.getUsername()) != null) {
+			// If email or username already exists, throw an exception
+			throw new IllegalArgumentException("Email already registered");
+		}
+    	
         OtpStore.tempUsers.put(request.getEmail(), request);
         otpService.generateAndSendOtp(request.getEmail());
     }

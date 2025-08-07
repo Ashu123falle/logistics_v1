@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class VehicleResponseDTO {
     private Long id;
-    private String vehicleNumber;
+    private String registrationNumber;
     private String model;
     private String type;
     private Double capacity;
