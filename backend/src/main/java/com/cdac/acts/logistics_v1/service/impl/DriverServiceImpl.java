@@ -169,6 +169,9 @@ public class DriverServiceImpl implements DriverService {
 
 	@Override
 	public void registerTempDriver(DriverRequestDTO request) {
+		if(driverRepository.existsByEmail(request.getEmail())) {
+			throw new RuntimeException("Driver with this email already exists");
+		}
 		OtpStore.tempDriver.put(request.getEmail(), request);
 		otpService.generateAndSendOtp(request.getEmail());
 		
