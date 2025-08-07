@@ -7,7 +7,7 @@ import com.cdac.acts.logistics_v1.dto.DeliveryOrderResponseDTO;
 
 public interface DeliveryOrderService {
     DeliveryOrderResponseDTO createOrder(DeliveryOrderRequestDTO request);
-    DeliveryOrderResponseDTO getOrderById(Long id);
+//    DeliveryOrderResponseDTO getOrderById(Long id);
 //    List<DeliveryOrderResponseDTO> getAllOrders();
 //    Method with pagination
     List<DeliveryOrderResponseDTO> getAllOrders(int pageNo, int pageSize);
@@ -19,4 +19,7 @@ public interface DeliveryOrderService {
     List<DeliveryOrderResponseDTO> getOrdersByShipmentId(Long shipmentId);
     List<DeliveryOrderResponseDTO> getOrdersByDriverId(Long driverId);
     DeliveryOrderResponseDTO updateStatus(Long id, String status);
+	DeliveryOrderResponseDTO getOrderById(Long id);
+	DeliveryOrderResponseDTO optVerifyOrderTrack(String email);
+	String getOrderByIdTrack(Long id);
 }

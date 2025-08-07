@@ -3,6 +3,7 @@ package com.cdac.acts.logistics_v1.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cdac.acts.logistics_v1.dto.DeliveryOrderRequestDTO;
 import com.cdac.acts.logistics_v1.dto.DeliveryOrderResponseDTO;
+import com.cdac.acts.logistics_v1.dto.OtpVerificationRequest;
 import com.cdac.acts.logistics_v1.service.DeliveryOrderService;
+import com.cdac.acts.logistics_v1.service.OtpService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +34,11 @@ import lombok.RequiredArgsConstructor;
 public class DeliveryOrderController {
 
     private final DeliveryOrderService deliveryOrderService;
+    
+    @Autowired
+    private OtpService otpService;
+
+	
 
     /**
      * Create Delivery Order
@@ -48,8 +56,26 @@ public class DeliveryOrderController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('DRIVER')")
     @GetMapping("/{id}")
     public ResponseEntity<DeliveryOrderResponseDTO> getOrderById(@PathVariable Long id) {
-        DeliveryOrderResponseDTO order = deliveryOrderService.getOrderById(id);
-        return ResponseEntity.ok(order); // ✅ 200 OK
+      DeliveryOrderResponseDTO orderById = deliveryOrderService.getOrderById(id);
+        return ResponseEntity.ok(orderById); // ✅ 200 OK
+    }
+    
+    
+    @GetMapping("/trackOrder/{id}")
+    public ResponseEntity<String> getOrderByIdTrack(@PathVariable Long id) {
+       String message = deliveryOrderService.getOrderByIdTrack(id);
+        return ResponseEntity.ok(message); // ✅ 200 OK
+    }
+    
+    
+    @PostMapping("verify-orderTrack-otp")
+    public ResponseEntity<String> verifyOtp(@RequestBody OtpVerificationRequest otpRequest) {
+        boolean isValid = otpService.verifyOtp(otpRequest.getEmail(), otpRequest.getOtp());
+        if (isValid) {
+            String status = deliveryOrderService.optVerifyOrderTrack(otpRequest.getEmail()).getStatus();
+            return ResponseEntity.ok(status); // ✅ 200 OK 
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP. Please try again.");
     }
 
     /**
