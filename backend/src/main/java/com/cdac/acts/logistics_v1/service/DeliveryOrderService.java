@@ -18,4 +18,5 @@ public interface DeliveryOrderService {
     // Extra
     List<DeliveryOrderResponseDTO> getOrdersByShipmentId(Long shipmentId);
     List<DeliveryOrderResponseDTO> getOrdersByDriverId(Long driverId);
+    DeliveryOrderResponseDTO updateStatus(Long id, String status);
 }

@@ -9,10 +9,15 @@ import Payments from "../components/DashBoards/Driver/Payments";
 import Documents from "../components/DashBoards/Driver/Documents";
 import Settings from "../components/DashBoards/Driver/Settings";
 import Logout from "../components/DashBoards/Driver/Logout";
+import DriverLayout from "../pages/driver/DriverLayout";
+import DriverDashboard from "../pages/driver/DriverDashboard";
+import DriverDeliveries from "../pages/driver/DriverDeliveries";
+import DriverProfile from "../pages/driver/DriverProfile";
+import DriverRouteMap from "../pages/driver/DriverRouteMap";
 
 const DriverRoutes = (
   <Route element={<PrivateRoute allowedRoles={["ROLE_DRIVER"]} />}>
-    <Route path="/driver" element={<DriverDashboardLayout />}>
+    {/* <Route path="/driver" element={<DriverDashboardLayout />}>
       <Route index element={<DriverDashboardHome />} />
       <Route path="trips" element={<MyTrips />} />
       <Route path="routes/:routeName" element={<RouteDetails />} />
@@ -20,7 +25,19 @@ const DriverRoutes = (
       <Route path="documents" element={<Documents />} />
       <Route path="settings" element={<Settings />} />
       <Route path="logout" element={<Logout />} />
-    </Route>
+    </Route> */}
+
+      <Route path="/driver" element={<DriverLayout />}>
+        <Route index element={<DriverDashboard />} />
+        {/* <Route path="trips" element={<MyTrips />} /> */}
+        <Route path="deliveries" element={<DriverDeliveries />} />
+        <Route path="dashboard" element={<DriverDashboard />} />
+        <Route path="profile" element={<DriverProfile />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="route/:routeId" element={<DriverRouteMap />} />
+
+      </Route>
+
   </Route>
 );
 

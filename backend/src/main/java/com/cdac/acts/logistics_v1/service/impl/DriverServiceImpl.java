@@ -135,6 +135,8 @@ public class DriverServiceImpl implements DriverService {
 	@Override
 	public DriverLocationResponseDTO updateLocation(DriverLocationRequestDTO driverLocaction) {
 	    
+		System.out.println("Incoming location update: " + driverLocaction.getDriverId() + ", " + driverLocaction.getLatitude() + ", " + driverLocaction.getLongitude());
+
 	    Driver driver = driverRepository.findById(driverLocaction.getDriverId())
 	            .orElseThrow(() -> new ResourceNotFoundException("Driver not Found( id: " + driverLocaction.getDriverId() + " )"));
 

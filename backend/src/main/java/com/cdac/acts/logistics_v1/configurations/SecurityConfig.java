@@ -57,14 +57,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/**").hasRole("ADMIN")
                         
                         .requestMatchers(HttpMethod.POST, "/api/customers").permitAll()
-                        .requestMatchers("/api/customer/**").hasAnyRole("CUSTOMER", "ADMIN")
+                        .requestMatchers("/api/customer/**").hasAnyRole("CUSTOMER", "ADMIN","DRIVER")
 
                         .requestMatchers("/api/delivery-orders/**").hasAnyRole("CUSTOMER","ADMIN","DRIVER")
 
                         .requestMatchers(HttpMethod.POST, "/api/drivers").permitAll()
-                        .requestMatchers("/api/drivers/**").hasAnyRole("DRIVER","ADMIN")
+                        .requestMatchers("/api/drivers/**").hasAnyRole("DRIVER","ADMIN") 
                         
-                        
+                        .requestMatchers("/api/routes/**").hasAnyRole("DRIVER","ADMIN")   
+                     
                         .requestMatchers("/api/payment/**").hasAnyRole("CUSTOMER","ADMIN")
                         
                         .requestMatchers("/api/shipments/**").hasAnyRole("CUSTOMER","ADMIN","DRIVER")
@@ -108,7 +109,7 @@ public class SecurityConfig {
 
         config.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://127.0.0.1:5500" ,"http://localhost:5173","http://localhost:5174","https://logistics-v1.vercel.app/")); 
 
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH","OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
 

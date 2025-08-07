@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/routes")
-@CrossOrigin("*")
 @RequiredArgsConstructor  // ✅ Constructor Injection (Best Practice)
 public class RouteController {
 
