@@ -1,7 +1,6 @@
 package com.cdac.acts.logistics_v1.dto;
-import java.time.LocalDateTime;
-import java.util.*;
 
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
 @Data

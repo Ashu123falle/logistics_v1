@@ -3,7 +3,6 @@ package com.cdac.acts.logistics_v1.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,8 +20,6 @@ import com.cdac.acts.logistics_v1.dto.CustomerDashboardDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
 import com.cdac.acts.logistics_v1.dto.OtpVerificationRequest;
-import com.cdac.acts.logistics_v1.model.Customer;
-import com.cdac.acts.logistics_v1.repository.CustomerRepository;
 import com.cdac.acts.logistics_v1.service.CustomerService;
 import com.cdac.acts.logistics_v1.service.OtpService;
 import com.cdac.acts.logistics_v1.utilities.JwtUtil;
@@ -70,7 +67,7 @@ public class CustomerController {
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize) {
 
-        List<CustomerResponseDTO> customers = customerService.getAllCustomers(); // Add pagination later if needed
+        List<CustomerResponseDTO> customers = customerService.getAllCustomers(); 
         return ResponseEntity.ok(customers);
     }
 

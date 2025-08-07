@@ -1,5 +1,4 @@
 package com.cdac.acts.logistics_v1.dto;
-import java.util.*;
 
 import lombok.Builder;
 import lombok.Data;

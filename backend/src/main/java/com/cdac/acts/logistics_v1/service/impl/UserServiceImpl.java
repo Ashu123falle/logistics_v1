@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,7 +25,6 @@ import com.cdac.acts.logistics_v1.model.User;
 import com.cdac.acts.logistics_v1.repository.DeliveryOrderRepository;
 import com.cdac.acts.logistics_v1.repository.DriverRepository;
 import com.cdac.acts.logistics_v1.repository.UserRepository;
-import com.cdac.acts.logistics_v1.service.EmailService;
 import com.cdac.acts.logistics_v1.service.UserService;
 import com.cdac.acts.logistics_v1.utilities.JwtUtil;
 
@@ -53,9 +50,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final OtpServiceImpl otpService;
     
-    @Autowired
-    private final EmailService emailService;
-
     private UserResponseDTO mapToResponseDTO(User user) {
         return UserResponseDTO.builder()
                 .userId(user.getUserId())
