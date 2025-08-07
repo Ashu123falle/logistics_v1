@@ -1,28 +1,14 @@
-import {
-  Typography,
-  TextField,
-  Button,
-  Box,
-  Paper,
-} from "@mui/material";
+import { Typography, TextField, Button, Box } from '@mui/material';
 
 const Support = () => {
   return (
-    <Box component={Paper} sx={{ p: 4 }}>
-      <Typography variant="h5" gutterBottom>
-        Raise a Support Ticket
-      </Typography>
-      <TextField
-        multiline
-        rows={5}
-        fullWidth
-        label="Describe your issue"
-        variant="outlined"
-        sx={{ mb: 3 }}
-      />
-      <Button variant="contained" color="success">
-        Submit Ticket
-      </Button>
+    <Box>
+      <Typography variant="h4">🛠 Support / Contact Us</Typography>
+      <Box component="form" sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <TextField label="Subject" required fullWidth />
+        <TextField label="Message" required fullWidth multiline rows={4} />
+        <Button variant="contained">Submit</Button>
+      </Box>
     </Box>
   );
 };
