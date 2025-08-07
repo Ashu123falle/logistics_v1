@@ -1,53 +1,35 @@
-// src/context/AuthContext.js
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; 
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({
     isAuthenticated: false,
-    token: null,
     userId: null,
     role: null,
+    token: null,
   });
 
-  const [loading, setLoading] = useState(true); // ✅ new loading flag
-
   useEffect(() => {
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-
+    const token = localStorage.getItem("token");
     if (token) {
       try {
         const decoded = jwtDecode(token);
-
-        if (decoded.exp * 1000 < Date.now()) {
-          console.log("Token expired");
-          localStorage.removeItem("token");
-          sessionStorage.removeItem("token");
-          setLoading(false);
-          return;
-        }
-
-       setAuth({
-  isAuthenticated: true,
-  token,
-  userId: decoded.userId,
-  role: decoded.authorities, // Now just "DRIVER"
-  // role: decoded.authorities?.replace("ROLE_", ""), // Now just "DRIVER"
-});
-
-      } catch (e) {
-        console.error("Invalid token", e);
+        setAuth({
+          isAuthenticated: true,
+          userId: decoded.userId,
+          role: decoded.authorities,
+          token,
+        });
+      } catch (err) {
+        console.error("Invalid token");
         localStorage.removeItem("token");
-        sessionStorage.removeItem("token");
       }
     }
-
-    setLoading(false); // ✅ always stop loading after check
   }, []);
-  
- const logout = () => {
+
+  const logout = () => {
     localStorage.removeItem("token");
     setAuth({
       isAuthenticated: false,
@@ -55,14 +37,15 @@ export const AuthProvider = ({ children }) => {
       role: null,
       token: null,
     });
-    window.location.href = "/";
-
+    window.location.href = "/login";
   };
+
   return (
-    <AuthContext.Provider value={{ auth, setAuth, loading,logout }}>
+    <AuthContext.Provider value={{ auth, setAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+// Custom hook
 export const useAuth = () => useContext(AuthContext);

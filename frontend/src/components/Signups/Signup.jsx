@@ -43,7 +43,8 @@ const Signup = () => {
     };
 
     try {
-      const res = await fetch("https://logistics-v1.onrender.com/api/customer/register-customer", {
+
+      const res = await fetch("http://localhost:8080/api/customer/register-customer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -69,7 +70,8 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("https://logistics-v1.onrender.com/api/customer/verify-customer-otp", {
+
+      const res = await fetch("http://localhost:8080/api/customer/verify-customer-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email, otp }),

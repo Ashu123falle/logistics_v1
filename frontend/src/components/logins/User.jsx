@@ -18,9 +18,10 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import './User.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; 
+import { useAuth } from '../../context/AuthContext'; // adjust path if needed
 import { jwtDecode } from "jwt-decode"; 
 import Navbar from '../Navbar';
+
 
 
 const User = () => {
@@ -39,16 +40,17 @@ const User = () => {
     try {
       const response = await axios.post("http://localhost:8080/api/auth/login", {
       // const response = await axios.post("https://logistics-v1.onrender.com/api/auth/login", {
+
         username: emailOrPhone,
         password,
       });
 
       const token = response.data.token;
       const decoded = jwtDecode(token);
-      console.log(decoded);
-      
+
       const storage = rememberMe ? localStorage : sessionStorage;
       storage.setItem("token", token);
+
 
       setAuth({
         isAuthenticated: true,
@@ -79,7 +81,7 @@ const User = () => {
 
   return (
     <>
-    {/* <Navbar/> */}
+    <Navbar/>
     <Grid container className="login-layout">
       {/* LEFT - Image */}
       <Grid item md={6} className="login-image" />
@@ -171,6 +173,7 @@ const User = () => {
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
         >
+
         <Alert severity={snackbar.severity} variant="filled">
           {snackbar.message}
         </Alert>

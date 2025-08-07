@@ -60,23 +60,9 @@ const DriverProfile = () => {
             <Typography color="text.secondary">{driver?.phoneNumber}</Typography>
           </Grid>
           <Grid item>
-           <Button
-  variant="outlined"
-  startIcon={<EditIcon />}
-  sx={{
-    mt: 2,
-    color: "green",
-    borderColor: "green",
-    "&:hover": {
-      borderColor: "darkgreen",
-      color: "darkgreen",
-      backgroundColor: "transparent", // ensure no gray background on hover
-    },
-  }}
->
-  Edit Profile
-</Button>
-
+            <Button variant="outlined" startIcon={<EditIcon />}>
+              Edit Profile
+            </Button>
           </Grid>
         </Grid>
       </Paper>
@@ -114,9 +100,7 @@ const DriverProfile = () => {
         <Typography>
           <strong>Aadhaar Card:</strong> {driver?.aadhaarNumber || "Not uploaded"}
         </Typography>
-        <Button variant="contained" startIcon={<UploadFileIcon />} sx={{ mt: 2,
-            backgroundColor:"green",
-         }}>
+        <Button variant="contained" startIcon={<UploadFileIcon />} sx={{ mt: 2 }}>
           Upload New Documents
         </Button>
       </Paper>
