@@ -27,6 +27,7 @@ import com.cdac.acts.logistics_v1.model.User;
 import com.cdac.acts.logistics_v1.repository.DeliveryOrderRepository;
 import com.cdac.acts.logistics_v1.repository.DriverRepository;
 import com.cdac.acts.logistics_v1.repository.UserRepository;
+import com.cdac.acts.logistics_v1.service.EmailService;
 import com.cdac.acts.logistics_v1.service.UserService;
 import com.cdac.acts.logistics_v1.utilities.JwtUtil;
 
@@ -48,6 +49,12 @@ public class UserServiceImpl implements UserService {
     private final DriverRepository driverRepository;
     
     private final DeliveryOrderRepository deliveryOrderRepository;
+    
+    @Autowired
+    private final OtpServiceImpl otpService;
+    
+    @Autowired
+    private final EmailService emailService;
 
     private UserResponseDTO mapToResponseDTO(User user) {
         return UserResponseDTO.builder()
@@ -177,5 +184,28 @@ public class UserServiceImpl implements UserService {
                 .totalRevenue(totalRevenue != null ? totalRevenue : 0.0)
                 .build();
     }
+
+	@Override
+	public String forgotPassword(String email) {
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+		String userEmail = user.getEmail();
+		if (userEmail != null && !userEmail.isEmpty()) {
+			otpService.generateAndSendOtp(userEmail);
+			return "Password reset link sent to your email.";
+		}
+		
+		return "Error: Email not found for the user.";
+	}
+
+	@Override
+	public void resetPassword(String email, String newPassword) {
+		
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+		
+		user.setPassword(passwordEncoder.encode(newPassword));
+		userRepository.save(user);
+	}
 
 }

@@ -21,7 +21,7 @@ public class OtpServiceImpl implements OtpService {
         String otp = String.format("%06d", new Random().nextInt(999999));
         OtpStore.otpMap.put(email, otp);
         OtpStore.otpExpiryMap.put(email, LocalDateTime.now().plusMinutes(5));
-        emailService.sendSimpleEmail(email, "Your OTP for Registation", "Your OTP is: " + otp);
+        emailService.sendSimpleEmail(email, "Your OTP is ", "Your OTP is: " + otp);
     }
 
     @Override

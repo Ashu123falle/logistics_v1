@@ -13,4 +13,5 @@ public class OtpStore {
     public static final ConcurrentHashMap<String, CustomerRequestDTO> tempUsers = new ConcurrentHashMap<>();
     public static final ConcurrentHashMap<String, DriverRequestDTO> tempDriver = new ConcurrentHashMap<>();
     public static final ConcurrentHashMap<String, DeliveryOrderResponseDTO> tempEmailTrackOrder = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, String> tempPassword = new ConcurrentHashMap<>();
 }
