@@ -1,9 +1,14 @@
+// src/routes/PrivateRoute.jsx
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const PrivateRoute = ({ allowedRoles }) => {
-  const { auth } = useAuth();
+  const { auth, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>; // Or a spinner
+  }
 
   if (!auth.isAuthenticated) {
     return <Navigate to="/login" />;
