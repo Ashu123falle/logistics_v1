@@ -18,9 +18,9 @@ const currentUser = decoded || {};
 //   window.location.href = "/login";
 // }
 
-import ShipmentStep from "../PlaceOrderSteps/ShipmentStep";
-import RouteStep from "../PlaceOrderSteps/RouteStep";
-import DeliveryStep from "../PlaceOrderSteps/DeliveryStep";
+import ShipmentStep from "./PlaceOrderSteps/ShipmentStep";
+import RouteStep from "./PlaceOrderSteps/RouteStep";
+import DeliveryStep from "./PlaceOrderSteps/DeliveryStep";
 
 
 // import axios from "axios";

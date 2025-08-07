@@ -28,7 +28,7 @@ public class DriverLocation {
     private LocalDateTime timestamp;
 
     @OneToOne
-    @JoinColumn(name = "driver_id", unique = true)
+    @JoinColumn(name = "driver_id", unique = true,nullable = false)
     private Driver driver;
 
 }

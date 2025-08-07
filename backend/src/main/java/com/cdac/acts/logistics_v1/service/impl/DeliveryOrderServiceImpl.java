@@ -27,7 +27,6 @@ import com.cdac.acts.logistics_v1.service.EmailService;
 
 @Service
 @Transactional
-
 public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     private final DeliveryOrderRepository deliveryOrderRepository;
@@ -166,17 +165,30 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
                 .collect(Collectors.toList());
     }
 
+    public DeliveryOrderResponseDTO updateStatus(Long id, String status) {
+        DeliveryOrder order = deliveryOrderRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        System.out.println(order);
+        order.setStatus(DeliveryStatus.valueOf(status.toUpperCase())); // assumes you use an enum
+        deliveryOrderRepository.save(order);
+
+        return mapToResponse(order);
+    }
+
+    
     private DeliveryOrderResponseDTO mapToResponse(DeliveryOrder order) {
         return new DeliveryOrderResponseDTO(
                 order.getId(),
                 order.getShipment().getId(),
                 order.getRoute().getId(),
                 order.getAssignedDriver().getUserId(),
+                order.getPlacedBy().getUserId(),
                 order.getCost(),
                 order.getStatus().name(),
                 order.getScheduledPickupDate(),
                 order.getScheduledDeliveryDate(),
                 order.getNotes()
+                
         );
     }
 }

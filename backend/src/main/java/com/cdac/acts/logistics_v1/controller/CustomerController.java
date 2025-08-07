@@ -75,7 +75,7 @@ public class CustomerController {
     }
 
 
-    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
+    
     @GetMapping("/{id}")
     public ResponseEntity<CustomerResponseDTO> getCustomerById(@PathVariable Long id) {
         CustomerResponseDTO customer = customerService.getCustomerById(id);
