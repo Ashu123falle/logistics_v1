@@ -18,7 +18,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import './User.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; // adjust path if needed
+import { useAuth } from '../../context/AuthContext'; 
 import { jwtDecode } from "jwt-decode"; 
 import Navbar from '../Navbar';
 
@@ -81,7 +81,7 @@ const User = () => {
 
   return (
     <>
-    <Navbar/>
+    {/* <Navbar/> */}
     <Grid container className="login-layout">
       {/* LEFT - Image */}
       <Grid item md={6} className="login-image" />

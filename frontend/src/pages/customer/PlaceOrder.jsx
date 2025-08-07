@@ -7,65 +7,43 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import { jwtDecode } from "jwt-decode"; // ✅ CORRECT
+import { jwtDecode } from "jwt-decode";
+import ShipmentStep from "./PlaceOrderSteps/ShipmentStep";
+import RouteStep from "./PlaceOrderSteps/RouteStep";
+import DeliveryStep from "./PlaceOrderSteps/DeliveryStep";
+import OrderSummary from "./PlaceOrderSteps/OrderSummary";
 
 const token = localStorage.getItem("token");
 const decoded = token ? jwtDecode(token) : null;
 const currentUser = decoded || {};
 
-// if (!token) {
-//   alert("Please log in again");
-//   window.location.href = "/login";
-// }
-
-import ShipmentStep from "./PlaceOrderSteps/ShipmentStep";
-import RouteStep from "./PlaceOrderSteps/RouteStep";
-import DeliveryStep from "./PlaceOrderSteps/DeliveryStep";
-
-
-// import axios from "axios";
-
-const steps = ["Shipment Details", "Route Selection", "Delivery Details"];
+const steps = ["Shipment Details", "Route Selection", "Delivery Details", "Order Summary"];
 
 const PlaceOrder = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [shipmentData, setShipmentData] = useState({});
   const [routeData, setRouteData] = useState({});
   const [deliveryData, setDeliveryData] = useState({});
+  const [shipmentId, setShipmentId] = useState(null);
+  const [routeId, setRouteId] = useState(null);
+  const [finalOrder, setFinalOrder] = useState(null);
 
   const handleNext = async () => {
-    if (activeStep === steps.length - 1) {
-      try {
-        const shipmentRes = await axios.post("/api/shipments", shipmentData);
-        const shipmentId = shipmentRes.data.id;
-
-        const routeRes = await axios.post("/api/routes", routeData);
-        const routeId = routeRes.data.id;
-
-        const payload = {
-          ...deliveryData,
-          shipmentId,
-          routeId,
-        };
-
-        await axios.post("/api/orders", payload);
-
-        alert("Order placed successfully!");
-        setActiveStep(0);
-        setShipmentData({});
-        setRouteData({});
-        setDeliveryData({});
-      } catch (err) {
-        alert("Failed to place order.");
-        console.error(err);
-      }
-    } else {
-      setActiveStep((prev) => prev + 1);
-    }
+    setActiveStep((prev) => prev + 1);
   };
 
   const handleBack = () => {
     setActiveStep((prev) => prev - 1);
+  };
+
+  const resetForm = () => {
+    setShipmentData({});
+    setRouteData({});
+    setDeliveryData({});
+    setShipmentId(null);
+    setRouteId(null);
+    setFinalOrder(null);
+    setActiveStep(0);
   };
 
   return (
@@ -84,23 +62,42 @@ const PlaceOrder = () => {
 
       <Box mt={4}>
         {activeStep === 0 && (
-          <ShipmentStep data={shipmentData} setData={setShipmentData} />
+          <ShipmentStep data={shipmentData} setData={setShipmentData} onContinue={(id) => {
+            setShipmentId(id);
+            handleNext();
+          }} />
         )}
         {activeStep === 1 && (
-          <RouteStep data={routeData} setData={setRouteData} />
+          <RouteStep data={routeData} setData={setRouteData} onContinue={(route) => {
+            setRouteId(route.id);
+            handleNext();
+          }} />
         )}
         {activeStep === 2 && (
-           <DeliveryStep data={deliveryData} setData={setDeliveryData} customerId={currentUser.customerId} />
+          <DeliveryStep
+            data={deliveryData}
+            setData={setDeliveryData}
+            shipmentId={shipmentId}
+            routeId={routeId}
+            customerId={currentUser.customerId}
+            routeData={routeData}
+            onPaymentSuccess={(order) => {
+              setFinalOrder(order);
+              handleNext();
+            }}
+          />
+        )}
+        {activeStep === 3 && finalOrder && (
+          <OrderSummary order={finalOrder} onFinish={resetForm} />
         )}
 
-        <Box mt={4} display="flex" justifyContent="space-between">
-          <Button disabled={activeStep === 0} onClick={handleBack}>
-            Back
-          </Button>
-          <Button variant="contained" onClick={handleNext}>
-            {activeStep === steps.length - 1 ? "Submit" : "Next"}
-          </Button>
-        </Box>
+        {activeStep < 3 && (
+          <Box mt={4} display="flex" justifyContent="space-between">
+            <Button disabled={activeStep === 0} onClick={handleBack}>
+              Back
+            </Button>
+          </Box>
+        )}
       </Box>
     </Box>
   );

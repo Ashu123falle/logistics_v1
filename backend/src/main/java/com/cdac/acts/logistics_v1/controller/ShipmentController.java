@@ -35,9 +35,10 @@ public class ShipmentController {
     @Autowired
     private ImageUploadService imageUploadService;
 
-    @PreAuthorize("hasRole('CUSTOMER')")
+//    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','DRIVER')")
     @PostMapping
     public ResponseEntity<ShipmentResponseDTO> createShipment(@RequestBody ShipmentRequestDTO request) {
+    	System.out.println("in add method !!!!");
         ShipmentResponseDTO shipment = shipmentService.createShipment(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(shipment);
     }
