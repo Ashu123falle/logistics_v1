@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.cdac.acts.logistics_v1.dto.DeliveryOrderRequestDTO;
 import com.cdac.acts.logistics_v1.dto.DeliveryOrderResponseDTO;
+import com.cdac.acts.logistics_v1.dto.InvoiceResponseDTO;
 
 public interface DeliveryOrderService {
 
@@ -35,4 +36,7 @@ public interface DeliveryOrderService {
 	
 	DeliveryOrderResponseDTO optVerifyOrderTrack(String email);
 	String getOrderByIdTrack(Long id);
+
+
+	 List<InvoiceResponseDTO>  getInvoicesByCustomerId(Long customerId);
 }

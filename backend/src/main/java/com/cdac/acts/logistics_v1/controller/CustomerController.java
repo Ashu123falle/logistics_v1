@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cdac.acts.logistics_v1.dto.CustomerDashboardDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerRequestDTO;
 import com.cdac.acts.logistics_v1.dto.CustomerResponseDTO;
+import com.cdac.acts.logistics_v1.dto.DeliveryOrderResponseDTO;
+import com.cdac.acts.logistics_v1.dto.InvoiceResponseDTO;
 import com.cdac.acts.logistics_v1.dto.OtpVerificationRequest;
 import com.cdac.acts.logistics_v1.service.CustomerService;
+import com.cdac.acts.logistics_v1.service.DeliveryOrderService;
 import com.cdac.acts.logistics_v1.service.OtpService;
 import com.cdac.acts.logistics_v1.utilities.JwtUtil;
 
@@ -37,6 +40,8 @@ public class CustomerController {
     @Autowired
     private JwtUtil jwtUtil;	
 
+    @Autowired
+    private DeliveryOrderService deliveryOrderService;
     // Create a new customer
     @PostMapping
     public ResponseEntity<String> createCustomer(@RequestBody CustomerRequestDTO customerDTO) {
@@ -92,7 +97,11 @@ public class CustomerController {
     public ResponseEntity<CustomerDashboardDTO> getCustomerDashboard(@PathVariable Long customerId) {
         return ResponseEntity.ok(customerService.getCustomerDashboard(customerId));
     }
-    
+    @GetMapping("/track/{orderId}")
+    public ResponseEntity<DeliveryOrderResponseDTO> trackShipment(@PathVariable Long orderId) {
+    	DeliveryOrderResponseDTO shipment = deliveryOrderService.getOrderById(orderId);
+        return ResponseEntity.ok(shipment);
+    }
     // Get dashboard metrics for a logged-in customer (via JWT token)
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/dashboard")
@@ -119,4 +128,10 @@ public class CustomerController {
         }
         return ResponseEntity.badRequest().body("Invalid or expired OTP");
     }
+    @GetMapping("/invoices/{customerId}")
+    public ResponseEntity<List<InvoiceResponseDTO>> getInvoicesByCustomerId(@PathVariable Long customerId) {
+        List<InvoiceResponseDTO> invoices = deliveryOrderService.getInvoicesByCustomerId(customerId);
+        return ResponseEntity.ok(invoices);
+    }
+
 }
