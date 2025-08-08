@@ -32,7 +32,7 @@ public interface DeliveryOrderService {
 
     // Update the status of a delivery order
     DeliveryOrderResponseDTO updateStatus(Long id, String status);
-	DeliveryOrderResponseDTO getOrderById(Long id);
+	
 	DeliveryOrderResponseDTO optVerifyOrderTrack(String email);
 	String getOrderByIdTrack(Long id);
 }
