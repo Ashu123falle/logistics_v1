@@ -11,6 +11,7 @@ import com.cloudinary.Cloudinary;
 
 @Configuration
 public class CloudinaryConfig {
+
     @Value("${cloudinary.cloud_name}")
     private String cloudName;
 
@@ -20,8 +21,9 @@ public class CloudinaryConfig {
     @Value("${cloudinary.api_secret}")
     private String apiSecret;
 
+    // Bean configuration for Cloudinary client
     @Bean
-     Cloudinary cloudinary() {
+    Cloudinary cloudinary() {
         Map<String, String> config = new HashMap<>();
         config.put("cloud_name", cloudName);
         config.put("api_key", apiKey);
@@ -29,4 +31,3 @@ public class CloudinaryConfig {
         return new Cloudinary(config);
     }
 }
-

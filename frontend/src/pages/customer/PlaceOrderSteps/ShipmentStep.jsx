@@ -50,6 +50,8 @@ const ShipmentStep = ({ data, setData, onContinue }) => {
         ...savedShipment,
       }));
 
+     
+
       setSuccess(true);
 
       if (onContinue) onContinue(savedShipment.id);

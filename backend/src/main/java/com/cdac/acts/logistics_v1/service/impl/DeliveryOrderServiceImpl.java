@@ -2,6 +2,7 @@ package com.cdac.acts.logistics_v1.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,12 @@ import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
 import com.cdac.acts.logistics_v1.model.Customer;
 import com.cdac.acts.logistics_v1.model.DeliveryOrder;
 import com.cdac.acts.logistics_v1.model.Driver;
+import com.cdac.acts.logistics_v1.model.Payment;
 import com.cdac.acts.logistics_v1.model.Route;
 import com.cdac.acts.logistics_v1.model.Shipment;
 import com.cdac.acts.logistics_v1.repository.DeliveryOrderRepository;
 import com.cdac.acts.logistics_v1.repository.DriverRepository;
+import com.cdac.acts.logistics_v1.repository.PaymentRepository;
 import com.cdac.acts.logistics_v1.repository.RouteRepository;
 import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
 import com.cdac.acts.logistics_v1.service.DeliveryOrderService;
@@ -34,8 +37,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     private final ShipmentRepository shipmentRepository;
     private final RouteRepository routeRepository;
     private final DriverRepository driverRepository;
-    
-    
+    private final PaymentRepository paymentRepository;
+
     @Autowired
     private EmailService emailService;
     
@@ -46,15 +49,16 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
             DeliveryOrderRepository deliveryOrderRepository,
             ShipmentRepository shipmentRepository,
             RouteRepository routeRepository,
-            DriverRepository driverRepository
+            DriverRepository driverRepository,
+            PaymentRepository paymentRepository
     ) {
         this.deliveryOrderRepository = deliveryOrderRepository;
         this.shipmentRepository = shipmentRepository;
         this.routeRepository = routeRepository;
         this.driverRepository = driverRepository;
+        this.paymentRepository = paymentRepository;
     }
 
-    
     private void sendOrderConfirmationEmail(DeliveryOrder order) {
         Customer customer = order.getShipment().getCustomer();
         String to = customer.getCompanyEmail();
@@ -65,9 +69,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
             + "Order ID       : " + order.getId() + "\n"
             + "Status         : " + order.getStatus().name() + "\n"
             + "Pickup Date    : " + order.getScheduledPickupDate() + "\n"
-            + "Driver Name    : " + order.getAssignedDriver().getFirstName() + " "+order.getAssignedDriver().getLastName()+"\n"
-            + "Contact Number : " + order.getAssignedDriver().getPhoneNumber() + "\n"
-            + "Vehicle Number : " + order.getAssignedDriver().getCurrentVehicle().getRegistrationNumber() + "\n"
+//            + "Driver Name    : " + order.getAssignedDriver().getFirstName() + " " + order.getAssignedDriver().getLastName() + "\n"
+//            + "Contact Number : " + order.getAssignedDriver().getPhoneNumber() + "\n"
+//            + "Vehicle Number : " + order.getAssignedDriver().getCurrentVehicle().getRegistrationNumber() + "\n"
             + "Cost           : ₹" + order.getCost() + "\n\n"
             + "Thank you for choosing MoveBiz.\n\n"
             + "Best regards,\n"
@@ -76,35 +80,52 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         emailService.sendSimpleEmail(to, subject, text);
     }
 
-    
     @Override
     public DeliveryOrderResponseDTO createOrder(DeliveryOrderRequestDTO request) {
+
+        // Fetch shipment
         Shipment shipment = shipmentRepository.findById(request.getShipmentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found with id: " + request.getShipmentId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Shipment not found with id: " + request.getShipmentId()
+                ));
 
+        // Fetch route
         Route route = routeRepository.findById(request.getRouteId())
-                .orElseThrow(() -> new ResourceNotFoundException("Route not found with id: " + request.getRouteId()));
-
-        Driver driver = driverRepository.findById(request.getDriverId())
-                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + request.getDriverId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Route not found with id: " + request.getRouteId()
+                ));
 
         DeliveryOrder order = DeliveryOrder.builder()
                 .shipment(shipment)
                 .route(route)
-                .assignedDriver(driver)
+                .placedBy(shipment.getCustomer()) 
                 .cost(request.getCost())
                 .status(DeliveryStatus.CONFIRMED)
                 .scheduledPickupDate(request.getScheduledPickupDate())
+                .scheduledDeliveryDate(request.getScheduledDeliveredDate())
                 .notes(request.getNotes())
                 .createdAt(LocalDateTime.now())
                 .build();
+
+        if (request.getPaymentId() != null) {
+              Optional<Payment> pay =  paymentRepository.findById(request.getPaymentId());
+              if (pay.isPresent()) {
+                  order.setPayment(pay.get());
+              } 
+        }
+
         order = deliveryOrderRepository.save(order);
+
+        if (order.getPayment() != null) {
+            order.getPayment().setDeliveryOrder(order);
+            paymentRepository.save(order.getPayment());
+        }
+
         sendOrderConfirmationEmail(order);
-        return mapToResponse(deliveryOrderRepository.save(order));
+
+        return mapToResponse(order);
     }
-    
-    
-    
+
     @Override
     public DeliveryOrderResponseDTO getOrderById(Long id) {
         DeliveryOrder order = deliveryOrderRepository.findById(id)
@@ -164,13 +185,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         order.setScheduledPickupDate(request.getScheduledPickupDate());
         order.setScheduledDeliveryDate(request.getScheduledDeliveredDate());
         order.setNotes(request.getNotes());
-        
 
         return mapToResponse(deliveryOrderRepository.save(order));
     }
-    
-   
-
 
     @Override
     public void deleteOrder(Long id) {
@@ -196,27 +213,25 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     public DeliveryOrderResponseDTO updateStatus(Long id, String status) {
         DeliveryOrder order = deliveryOrderRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-        System.out.println(order);
-        order.setStatus(DeliveryStatus.valueOf(status.toUpperCase())); // assumes you use an enum
+        order.setStatus(DeliveryStatus.valueOf(status.toUpperCase()));
         deliveryOrderRepository.save(order);
-
         return mapToResponse(order);
     }
 
-    
+
     private DeliveryOrderResponseDTO mapToResponse(DeliveryOrder order) {
         return new DeliveryOrderResponseDTO(
                 order.getId(),
                 order.getShipment().getId(),
                 order.getRoute().getId(),
-                order.getAssignedDriver().getUserId(),
+                order.getAssignedDriver() != null ? order.getAssignedDriver().getUserId() : 001,
                 order.getPlacedBy().getUserId(),
+                order.getPayment() != null ? order.getPayment().getId() : null,
                 order.getCost(),
                 order.getStatus().name(),
                 order.getScheduledPickupDate(),
                 order.getScheduledDeliveryDate(),
                 order.getNotes()
-                
         );
     }
 }

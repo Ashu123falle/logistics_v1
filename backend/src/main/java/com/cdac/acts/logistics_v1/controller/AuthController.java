@@ -17,29 +17,30 @@ import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
 import com.cdac.acts.logistics_v1.service.OtpService;
 import com.cdac.acts.logistics_v1.service.UserService;
 
-@RestController
-@RequestMapping("/api/auth")
-@CrossOrigin("*")
+@RestController 
+@RequestMapping("/api/auth") 
 public class AuthController {
 
     @Autowired
-    private UserService userService;
-    
+
+    private UserService userService; // Service for user authentication and registration
+
     @Autowired
     private OtpService otpService;
 
-    @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@RequestBody UserRequestDTO request) {
-        return ResponseEntity.status(201).body(userService.register(request));
 
+    @PostMapping("/register") // Handles user registration
+    public ResponseEntity<UserResponseDTO> register(@RequestBody UserRequestDTO request) {
+        return ResponseEntity.status(201).body(userService.register(request)); // Returns created user with 201 status
     }
 
-    @PostMapping("/login")
+    @PostMapping("/login") // Handles user login
     public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO request) {
         try {
-            AuthResponseDTO response = userService.authenticate(request);
-            return ResponseEntity.ok(response);
+            AuthResponseDTO response = userService.authenticate(request); // Authenticate user
+            return ResponseEntity.ok(response); // Return successful authentication response
         } catch (RuntimeException e) {
+            // Return error response if authentication fails
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(AuthResponseDTO.builder()
@@ -59,6 +60,7 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
 		}
 	}
+
 
     @PostMapping("/verify-otp")
 	public ResponseEntity<String> verifyOtp(@RequestBody ResetPasswordRequestDTO request) {

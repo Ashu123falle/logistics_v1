@@ -51,6 +51,9 @@ public class SecurityConfig {
                 		.requestMatchers(HttpMethod.POST, "/api/driver/register-driver").permitAll()
                 		.requestMatchers(HttpMethod.POST, "/api/driver/verify-driver-otp").permitAll()
                 		.requestMatchers(HttpMethod.POST, "/api/routes").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/payment/create").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/payment/verify").permitAll()
+
 
                 		
                         .requestMatchers("/api/auth/**").permitAll()
@@ -58,11 +61,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/**").hasRole("ADMIN")
                         
                         .requestMatchers(HttpMethod.POST, "/api/customers").permitAll()
+                        
                         .requestMatchers("/api/customer/**").hasAnyRole("CUSTOMER", "ADMIN","DRIVER")
 
                         .requestMatchers("/api/delivery-orders/**").hasAnyRole("CUSTOMER","ADMIN","DRIVER")
 
                         .requestMatchers(HttpMethod.POST, "/api/drivers").permitAll()
+                        
                         .requestMatchers("/api/drivers/**").hasAnyRole("DRIVER","ADMIN") 
                         
                         .requestMatchers("/api/routes/**").hasAnyRole("DRIVER","ADMIN")   

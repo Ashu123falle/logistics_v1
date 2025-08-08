@@ -35,15 +35,16 @@ public class CustomerController {
     private OtpService otpService;
     
     @Autowired
-	  private JwtUtil jwtUtil;	
+    private JwtUtil jwtUtil;	
 
-   
+    // Create a new customer
     @PostMapping
     public ResponseEntity<String> createCustomer(@RequestBody CustomerRequestDTO customerDTO) {
         customerService.register(customerDTO);
         return ResponseEntity.status(201).body("Customer created successfully.");
     }
 
+    // Update an existing customer
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCustomer(@PathVariable Long id,
@@ -54,6 +55,7 @@ public class CustomerController {
             : ResponseEntity.badRequest().body("Failed to update customer.");
     }
 
+    // Delete a customer by ID
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCustomer(@PathVariable Long id) {
@@ -61,18 +63,21 @@ public class CustomerController {
         return ResponseEntity.ok("Customer deleted successfully.");
     }
 
+    // Get all customers (admin only)
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<CustomerResponseDTO>> getAllCustomers(
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize) {
 
+
         List<CustomerResponseDTO> customers = customerService.getAllCustomers(); 
+
         return ResponseEntity.ok(customers);
     }
 
-
-    
+    // Get customer details by ID (self or admin)
+    @PreAuthorize("#id == authentication.principal.user.userId or hasRole('ADMIN') or hasRole('DRIVER')")
     @GetMapping("/{id}")
     public ResponseEntity<CustomerResponseDTO> getCustomerById(@PathVariable Long id) {
         CustomerResponseDTO customer = customerService.getCustomerById(id);
@@ -81,14 +86,14 @@ public class CustomerController {
             : ResponseEntity.notFound().build();
     }
 
-    // dashboard by id
+    // Get dashboard metrics for a customer by ID (admin)
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/dashboard/{customerId}")
     public ResponseEntity<CustomerDashboardDTO> getCustomerDashboard(@PathVariable Long customerId) {
         return ResponseEntity.ok(customerService.getCustomerDashboard(customerId));
     }
     
-    //dashboard by jwttoken
+    // Get dashboard metrics for a logged-in customer (via JWT token)
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/dashboard")
     public ResponseEntity<CustomerDashboardDTO> getCustomerDashboard(@RequestHeader("Authorization") String authHeader) {
@@ -97,12 +102,14 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getCustomerDashboard(customerId));
     }
 
+    // Register a customer with OTP verification
     @PostMapping("register-customer")
     public ResponseEntity<String> register(@RequestBody CustomerRequestDTO request) {
         customerService.registerTempCustomer(request);
         return ResponseEntity.ok("OTP sent to email");
     }
 
+    // Verify OTP and finalize customer registration
     @PostMapping("verify-customer-otp")
     public ResponseEntity<String> verifyOtp(@RequestBody OtpVerificationRequest otpRequest) {
         boolean isValid = otpService.verifyOtp(otpRequest.getEmail(), otpRequest.getOtp());
@@ -112,5 +119,4 @@ public class CustomerController {
         }
         return ResponseEntity.badRequest().body("Invalid or expired OTP");
     }
-
 }
