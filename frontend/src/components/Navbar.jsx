@@ -59,7 +59,7 @@ const userRole = auth.role;
         <Toolbar sx={{ justifyContent: "space-between" }}>
           {/* Logo */}
           <Typography variant="h6" sx={{ fontWeight: 700, color: "#fff" }}>
-            P2PLogistics
+            MoveBiz
           </Typography>
 
           {/* Desktop Nav */}

@@ -49,7 +49,8 @@ const ShipmentStep = ({ data, setData, onContinue }) => {
         ...prev,
         ...savedShipment,
       }));
-
+      console.log(setData);
+      
       setSuccess(true);
 
       if (onContinue) onContinue(savedShipment.id);
