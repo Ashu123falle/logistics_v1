@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Paper,
   Table,
@@ -9,25 +9,61 @@ import {
   Typography,
   Box,
   TextField,
-  IconButton,
   InputAdornment,
   Button,
   Menu,
   MenuItem,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import axios from "axios";
 
-const rowsData = [
-  { source: "Jobs", revenue: 92300, spread: "10-15%", notes: "Primary source" },
-  { source: "Direct Deals", revenue: 60000, spread: "8%", notes: "Manual agreements" },
-  { source: "Insurance", revenue: 100000, spread: "12%", notes: "Partnership income" },
-];
+
+const API = axios.create({
+  baseURL: "http://localhost:8080/api",
+});
+
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export default function RevenueTable() {
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const [filterOption, setFilterOption] = useState("All");
+
+  useEffect(() => {
+    const fetchPaymentData = async () => {
+      try {
+        setLoading(true);
+        const response = await API.get("/payment");
+        
+        const sortedPayments = response.data.sort((a, b) => new Date(b.timeStamp) - new Date(a.timeStamp));
+        setPayments(sortedPayments);
+      } catch (err) {
+        console.error("Error fetching payment data:", err);
+        setError("Failed to load payment data. Please check the API connection.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPaymentData();
+  }, []);
 
   const handleFilterClick = (event) => {
     setFilterAnchorEl(event.currentTarget);
@@ -42,14 +78,15 @@ export default function RevenueTable() {
     setFilterAnchorEl(null);
   };
 
-  // Apply both search and filter
-  const filteredRows = rowsData
-    .filter((row) =>
-      row.source.toLowerCase().includes(searchTerm.toLowerCase())
+
+  const filteredPayments = payments
+    .filter((payment) =>
+      payment.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      payment.razorpayPaymentId.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    .filter((row) => {
-      if (filterOption === "High Revenue") return row.revenue > 80000;
-      if (filterOption === "Low Revenue") return row.revenue <= 80000;
+    .filter((payment) => {
+      if (filterOption === "High Amount") return payment.amount > 100;
+      if (filterOption === "Low Amount") return payment.amount <= 100;
       return true;
     });
 
@@ -64,24 +101,26 @@ export default function RevenueTable() {
         boxShadow: "0px 1px 3px rgba(0,0,0,0.05)",
       }}
     >
-      {/* Header with search and filter */}
+      {/* search and filter */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           mb: 2,
+          flexWrap: 'wrap',
+          gap: 1
         }}
       >
         <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-          Revenue streams table
+          Recent Payments
         </Typography>
 
         <Box sx={{ display: "flex", gap: 1 }}>
           {/* Search Bar */}
           <TextField
             size="small"
-            placeholder="Search"
+            placeholder="Search status..."
             variant="outlined"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -106,52 +145,64 @@ export default function RevenueTable() {
             {filterOption}
           </Button>
 
-          {/* Filter Dropdown Menu */}
+          {/*  Dropdown Menu */}
           <Menu
             anchorEl={filterAnchorEl}
             open={Boolean(filterAnchorEl)}
             onClose={handleFilterClose}
           >
             <MenuItem onClick={() => handleFilterSelect("All")}>All</MenuItem>
-            <MenuItem onClick={() => handleFilterSelect("High Revenue")}>
-              High Revenue(80k)
+            <MenuItem onClick={() => handleFilterSelect("High Amount")}>
+              High Amount ( &gt; $100 )
             </MenuItem>
-            <MenuItem onClick={() => handleFilterSelect("Low Revenue")}>
-              Low Revenue ( ≤ 80k )
+            <MenuItem onClick={() => handleFilterSelect("Low Amount")}>
+              Low Amount ( &le; $100 )
             </MenuItem>
           </Menu>
         </Box>
       </Box>
 
       {/* Table */}
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Source</TableCell>
-            <TableCell>Revenue</TableCell>
-            <TableCell>Spread %</TableCell>
-            <TableCell>Notes</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredRows.length > 0 ? (
-            filteredRows.map((row) => (
-              <TableRow key={row.source}>
-                <TableCell>{row.source}</TableCell>
-                <TableCell>${row.revenue.toLocaleString()}</TableCell>
-                <TableCell>{row.spread}</TableCell>
-                <TableCell>{row.notes}</TableCell>
-              </TableRow>
-            ))
-          ) : (
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {error && (
+        <Alert severity="error">{error}</Alert>
+      )}
+
+      {!loading && !error && (
+        <Table>
+          <TableHead>
             <TableRow>
-              <TableCell colSpan={4} align="center">
-                No data found
-              </TableCell>
+              <TableCell>Payment ID</TableCell>
+              <TableCell>Amount</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Timestamp</TableCell>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {filteredPayments.length > 0 ? (
+              filteredPayments.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell>{payment.razorpayPaymentId}</TableCell>
+                  <TableCell>${payment.amount.toLocaleString()}</TableCell>
+                  <TableCell>{payment.status}</TableCell>
+                  <TableCell>{new Date(payment.timeStamp).toLocaleString()}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  No data found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      )}
     </Paper>
   );
 }

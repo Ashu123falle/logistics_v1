@@ -9,7 +9,7 @@
 /* Left side image container */
 .login-image {
   flex: 1;
-  background-image: url('http://localhost:3000/images/Login.png');
+  background-image: url('https://logistics-v1.vercel.app/images/Login.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

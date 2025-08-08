@@ -8,107 +8,136 @@ import {
   Avatar,
   Toolbar,
   Typography,
-  Collapse,
+  Box,
+  Divider,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-
-// Icons
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import LocationOnIcon from "@mui/icons-material/LocationOn"; // Tracking icon
-import TrackChangesIcon from "@mui/icons-material/TrackChanges"; // Original Jobs icon
-import GroupIcon from "@mui/icons-material/Group";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import TrackChangesIcon from "@mui/icons-material/TrackChanges";
 import PersonIcon from "@mui/icons-material/Person";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 
 const drawerWidth = 260;
 
 const menuItems = [
   { text: "Dashboard", icon: <DashboardIcon />, path: "dashboard" },
   { text: "Trucks", icon: <LocalShippingIcon />, path: "trucks" },
-  { text: "Jobs", icon: <TrackChangesIcon />, path: "jobs" }, // Reverted Jobs icon
-  { text: "Tracking", icon: <LocationOnIcon />, path: "tracking", nested: true }, // Updated Tracking icon
+  { text: "Jobs", icon: <TrackChangesIcon />, path: "jobs" },
+  { text: "Tracking", icon: <LocationOnIcon />, path: "tracking" },
   { text: "Payments", icon: <PaymentsIcon />, path: "payments" },
   { text: "Payment Receipts", icon: <ReceiptIcon />, path: "payment-receipts" },
-  { text: "Complience", icon: <FolderOpenIcon />, path: "file-uploads" },
-  { text: "Customer Management", icon: <GroupIcon />, path: "Customermanagement" },
+  { text: "Compliance", icon: <FolderOpenIcon />, path: "file-uploads" },
   { text: "Driver Management", icon: <PersonIcon />, path: "driver" },
 ];
 
-// Example Order IDs (can be fetched from API)
-const orderIds = ["45216", "45217", "45218"];
-
-export default function Sidebar() {
+export default function Sidebar({ isMobile, mobileOpen, handleDrawerToggle }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [trackingOpen, setTrackingOpen] = useState(false);
+  const [username, setUsername] = useState("Admin");
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
 
-  // Sync active menu item with URL
+ 
+  const isSmallHeight = useMediaQuery("(max-height: 600px)");
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
+
   useEffect(() => {
     const currentIndex = menuItems.findIndex((item) =>
-      location.pathname.includes(item.path)
+      location.pathname.toLowerCase().includes(item.path.toLowerCase())
     );
     if (currentIndex !== -1) setActiveIndex(currentIndex);
   }, [location.pathname]);
 
-  return (
-    <Drawer
-      variant="permanent"
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) setUsername(storedUsername);
+  }, []);
+
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    navigate("/login");
+  };
+
+  const drawerContent = (
+    <Box
       sx={{
-        "& .MuiDrawer-paper": {
-          width: drawerWidth,
-          boxSizing: "border-box",
-          borderRight: "1px solid #f0f0f0",
-          background: "#ffffff",
-          borderRadius:5,
-       
-        },
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        overflow: "hidden",
       }}
-      open
     >
-      {/* Header */}
-      <Toolbar sx={{ display: "flex", flexDirection: "column", mt: 2 }}>
-        <Avatar sx={{ bgcolor: "#1976d2", mb: 1, width: 50, height: 50 }}>A</Avatar>
-        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-          Admin
+      {/* User Info */}
+      <Toolbar
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          mt: 2,
+          mb: 1,
+          px: 1,
+        }}
+      >
+        <Avatar
+          sx={{
+            bgcolor: "#22c55e",
+            mb: 1,
+            width: isSmallHeight ? 40 : 56,
+            height: isSmallHeight ? 40 : 56,
+            fontSize: isSmallHeight ? "1rem" : "1.2rem",
+          }}
+        >
+          {username?.[0]?.toUpperCase() || "A"}
+        </Avatar>
+        <Typography
+          variant="body1"
+          fontWeight="bold"
+          fontSize={isSmallHeight ? "0.85rem" : "1rem"}
+          textAlign="center"
+        >
+          {username || "Admin"}
         </Typography>
       </Toolbar>
 
+      <Divider sx={{ my: 1 }} />
+
       {/* Menu List */}
-      <List sx={{ mt: 2 }}>
-        {menuItems.map((item, index) => (
-          <React.Fragment key={item.text}>
+      <Box sx={{ flexGrow: 1, overflowY: "auto", px: 0.5 }}>
+        <List>
+          {menuItems.map((item, index) => (
             <ListItemButton
+              key={item.text}
               selected={activeIndex === index}
               onClick={() => {
-                if (item.nested) {
-                  setTrackingOpen(!trackingOpen);
-                } else {
-                  setActiveIndex(index);
-                  if (item.path !== "#") navigate(`/admin/${item.path}`);
-                }
+                setActiveIndex(index);
+                if (isMobile) handleDrawerToggle?.();
+                navigate(`/admin/${item.path}`);
               }}
               sx={{
-                mx: 1,
-                mb: 1,
+                mx: 0.5,
+                mb: 0.5,
                 borderRadius: "8px",
+                minHeight: isSmallHeight ? 36 : 44,
+                transition: "all 0.2s",
                 "&.Mui-selected": {
                   bgcolor: "#22c55e",
                   color: "white",
-                  "& .MuiListItemIcon-root": {
-                    color: "white",
-                  },
+                  "& .MuiListItemIcon-root": { color: "white" },
                 },
               }}
             >
               <ListItemIcon
                 sx={{
-                  minWidth: 40,
+                  minWidth: isSmallHeight ? 32 : 40,
                   color: activeIndex === index ? "white" : "#6b7280",
                 }}
               >
@@ -117,43 +146,91 @@ export default function Sidebar() {
               <ListItemText
                 primary={item.text}
                 primaryTypographyProps={{
-                  fontSize: "14px",
+                  fontSize: isSmallHeight ? "0.8rem" : "0.9rem",
                   fontWeight: activeIndex === index ? "bold" : "normal",
+                  noWrap: true,
                 }}
               />
-              {item.nested && (trackingOpen ? <ExpandLess /> : <ExpandMore />)}
             </ListItemButton>
+          ))}
+        </List>
+      </Box>
 
-            {/* Nested Tracking Orders */}
-            {item.nested && (
-              <Collapse in={trackingOpen} timeout="auto" unmountOnExit>
-                {orderIds.map((orderId) => (
-                  <ListItemButton
-                    key={orderId}
-                    sx={{
-                      pl: 8,
-                      borderRadius: "6px",
-                      mx: 1,
-                      mb: 0.5,
-                      "&:hover": {
-                        bgcolor: "#f0fdf4",
-                      },
-                    }}
-                    onClick={() => navigate(`/admin/tracking/${orderId}`)}
-                  >
-                    <ListItemText
-                      primary={`Order #${orderId}`}
-                      primaryTypographyProps={{
-                        fontSize: "13px",
-                      }}
-                    />
-                  </ListItemButton>
-                ))}
-              </Collapse>
-            )}
-          </React.Fragment>
-        ))}
-      </List>
+      <Divider />
+
+      {/* Logout */}
+      <ListItemButton
+        onClick={handleLogout}
+        sx={{
+          mx: 0.5,
+          mb: 1,
+          borderRadius: "8px",
+          minHeight: isSmallHeight ? 36 : 44,
+          "&:hover": { bgcolor: theme.palette.action.hover },
+        }}
+      >
+        <ListItemIcon
+          sx={{
+            minWidth: isSmallHeight ? 32 : 40,
+            color: "#6b7280",
+          }}
+        >
+          <ExitToAppIcon />
+        </ListItemIcon>
+        <ListItemText
+          primary="Logout"
+          primaryTypographyProps={{
+            fontSize: isSmallHeight ? "0.8rem" : "0.9rem",
+          }}
+        />
+      </ListItemButton>
+
+      {/* Footer */}
+      {!isSmallHeight && (
+        <Box
+          sx={{
+            py: 1.5,
+            textAlign: "center",
+            fontSize: "12px",
+            color: "#9ca3af",
+          }}
+        >
+          © 2025 MoveBiz Admin
+        </Box>
+      )}
+    </Box>
+  );
+
+  return isMobile || isTablet ? (
+    <Drawer
+      variant="temporary"
+      open={mobileOpen}
+      onClose={handleDrawerToggle}
+      ModalProps={{ keepMounted: true }}
+      sx={{
+        "& .MuiDrawer-paper": {
+          width: drawerWidth,
+          boxSizing: "border-box",
+          borderRight: `1px solid ${theme.palette.divider}`,
+        },
+      }}
+    >
+      {drawerContent}
+    </Drawer>
+  ) : (
+    <Drawer
+      variant="permanent"
+      open
+      sx={{
+        "& .MuiDrawer-paper": {
+          width: drawerWidth,
+          boxSizing: "border-box",
+          backgroundColor: "#ffffff",
+          borderRight: `1px solid ${theme.palette.divider}`,
+        },
+      }}
+    >
+      {drawerContent}
     </Drawer>
   );
 }

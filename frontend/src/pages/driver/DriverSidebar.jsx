@@ -34,7 +34,7 @@ const DriverSidebar = ({ drawerWidth, mobileOpen, handleDrawerToggle, isMobile }
   const navigate = useNavigate();
   const location = useLocation(); // <-- used for active item detection
 
-  const location = useLocation(); 
+
 
   useEffect(() => {
     const fetchData = async () => {

@@ -7,7 +7,7 @@ export default function ScrollToTopButton() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setShow(window.scrollY > 100); // show only after scrolling
+      setShow(window.scrollY > 100);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -22,14 +22,19 @@ export default function ScrollToTopButton() {
             position: "fixed",
             bottom: "20px",
             right: "20px",
-            backgroundColor: "black",
-            color: "red",
-            border:"1px solid white",
-            zIndex: 3000, // on top of everything
-            "&:hover": { backgroundColor: "#333" }
+            width: "48px",
+            height: "48px",
+            borderRadius: "0px", 
+            backgroundColor: "#E60028",
+            color: "#fff",
+            zIndex: 3000,
+            minHeight: "unset", 
+            "&:hover": {
+              backgroundColor: "#C40023",
+            },
           }}
         >
-          <KeyboardArrowUpIcon />
+          <KeyboardArrowUpIcon fontSize="medium" />
         </Fab>
       )}
     </>
