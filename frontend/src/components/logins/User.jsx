@@ -50,6 +50,8 @@ const User = () => {
 
       const storage = rememberMe ? localStorage : sessionStorage;
       storage.setItem("token", token);
+      // Store the username in local storage so the sidebar can access it
+      storage.setItem("username", emailOrPhone);
 
 
       setAuth({

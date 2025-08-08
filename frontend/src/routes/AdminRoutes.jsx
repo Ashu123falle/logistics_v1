@@ -10,16 +10,23 @@ import Payment from "../components/DashBoards/Admin/Payment";
 import TrucksManagement from "../components/DashBoards/Admin/TrucksManagement";
 import CustomerManagement from "../components/DashBoards/Admin/CustomerManagement";
 import JobManagement from "../components/DashBoards/Admin/JobManagement";
+import DashBoard from "../components/DashBoards/Admin/DashBoard";
+import DriverManagement from "../components/DashBoards/Admin/DriverManagement";
 
 const AdminRoutes = (
   <Route element={<PrivateRoute allowedRoles={["ROLE_ADMIN"]} />}>
     <Route path="/admin" element={<AdminDashBoard />}>
+      {/* Default dashboard route */}
+      <Route index element={<DashBoard />} />
+      
+      <Route path="dashboard" element={<DashBoard />} />
       <Route path="tracking" element={<Tracking />} />
       <Route path="tracking/:orderId" element={<Tracking />} />
       <Route path="payments" element={<Payment />} />
       <Route path="payment-receipts" element={<PaymentReceipts />} />
       <Route path="file-uploads" element={<CompliancePage />} />
       <Route path="customermanagement" element={<CustomerManagement />} />
+      <Route path="driver" element={<DriverManagement />} />
       <Route path="trucks" element={<TrucksManagement />} />
       <Route path="jobs" element={<JobManagement />} />
     </Route>

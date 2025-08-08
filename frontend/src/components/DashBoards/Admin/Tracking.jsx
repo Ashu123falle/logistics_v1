@@ -1,301 +1,202 @@
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import axios from "axios";
 import {
   Box,
+  TextField,
+  Button,
   Typography,
-  Grid,
   Paper,
-  Avatar,
-  IconButton,
-  Stepper,
-  Step,
-  StepLabel,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
-import PhoneIcon from "@mui/icons-material/Phone";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { API } from "../../../utilities/api";
 
-export default function Tracking() {
-  const { orderId } = useParams(); // Get dynamic order id from URL
 
-  const steps = [
-    "Scheduled",
-    "Confirmed",
-    "On route",
-    "Arrived",
-    "Delivered",
-    "Complete",
-  ];
-  const [activeStep] = useState(2); // example: currently "On route"
+export default function Tracking({ initialOrderId = "" }) {
+  const [orderId, setOrderId] = useState(initialOrderId);
+  const [shipment, setShipment] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [isTracking, setIsTracking] = useState(false);
+
+  const intervalRef = useRef(null);
+
+  const fetchShipment = async (id) => {
+    if (!id) {
+      setError("Please provide a valid order ID.");
+      setShipment(null);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      const response = await API.get(`/customer/track/${id}`);
+      setShipment(response.data);
+    } catch (err) {
+      console.error("Error fetching shipment:", err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.statusText ||
+        "Failed to fetch shipment data";
+      setError(msg);
+      setShipment(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startPolling = () => {
+    if (!orderId) {
+      setError("Please enter an order ID to start tracking.");
+      return;
+    }
+    fetchShipment(orderId);
+
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
+    intervalRef.current = setInterval(() => {
+      fetchShipment(orderId);
+    }, 1000);
+
+    setIsTracking(true);
+    setError("");
+  };
+
+  const stopPolling = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setIsTracking(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (initialOrderId) {
+      setOrderId(initialOrderId);
+    }
+  }, [initialOrderId]);
 
   return (
-    <Box sx={{ p: 3, bgcolor: "#f9fafb", minHeight: "100vh" }}>
-      {/* Order Header with Stepper */}
-      <Paper
+    <Paper sx={{ p: 3, maxWidth: 820, margin: "auto" }}>
+      <Typography variant="h6" mb={2}>
+        Track Delivery Order
+      </Typography>
+
+      {/*  container */}
+      <Box
         sx={{
-          p: 3,
-          mb: 3,
-          borderRadius: 3,
-          border: "1px solid #e5e7eb",
-          boxShadow: "0px 2px 8px rgba(0,0,0,0.05)",
           display: "flex",
-          flexDirection: "column",
+          flexDirection: { xs: "column", sm: "row" },
           gap: 2,
-          bgcolor: "#fff",
+          alignItems: { xs: "stretch", sm: "center" },
+          mb: 2,
         }}
       >
-        {/* Top Section */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
+        <TextField
+          fullWidth
+          label="Order ID"
+          value={orderId}
+          onChange={(e) => setOrderId(e.target.value.trim())}
+          size="small"
+        />
+
+        <Button
+          variant="contained"
+          onClick={startPolling}
+          disabled={isTracking || !orderId}
+          sx={{ flexShrink: 0 }}
         >
-          <Typography
-            variant="subtitle1"
-            fontWeight={600}
-            display="flex"
-            alignItems="center"
-            gap={1}
-            sx={{ color: "#111827" }}
-          >
-            <AssignmentIcon sx={{ color: "#22c55e" }} /> 
-            {orderId ? `Order ID: ${orderId}` : "No Order Selected"}
-          </Typography>
-          <IconButton
-            sx={{
-              bgcolor: "#f3f4f6",
-              "&:hover": { bgcolor: "#e5e7eb" },
-            }}
-          >
-            <RefreshIcon sx={{ color: "#374151" }} />
-          </IconButton>
+          Start Tracking
+        </Button>
+
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={stopPolling}
+          disabled={!isTracking}
+          sx={{ flexShrink: 0 }}
+        >
+          Stop
+        </Button>
+
+        <Button
+          variant="text"
+          onClick={() => {
+            stopPolling();
+            setShipment(null);
+            setError("");
+            setOrderId("");
+          }}
+          sx={{ flexShrink: 0 }}
+        >
+          Clear
+        </Button>
+      </Box>
+
+      {loading && (
+        <Box display="flex" alignItems="center" gap={1} mb={2}>
+          <CircularProgress size={20} />
+          <Typography variant="body2">Fetching shipment...</Typography>
         </Box>
+      )}
 
-        {/* Progress Steps */}
-        <Stepper
-          alternativeLabel
-          activeStep={activeStep}
-          sx={{
-            "& .MuiStepLabel-label": {
-              fontSize: "0.8rem",
-              color: "#6b7280",
-              fontWeight: 500,
-            },
-            "& .MuiStepLabel-label.Mui-active": {
-              color: "#111827",
-              fontWeight: 600,
-            },
-            "& .MuiStepConnector-line": {
-              borderColor: "#d1d5db",
-              borderTopWidth: 2,
-            },
-          }}
-        >
-          {steps.map((label, index) => (
-            <Step key={label}>
-              <StepLabel
-                StepIconProps={{
-                  sx: {
-                    color:
-                      index <= activeStep
-                        ? index === activeStep
-                          ? "#22c55e" // active
-                          : "#16a34a" // completed
-                        : "#d1d5db", // incomplete
-                  },
-                }}
-              >
-                {label}
-              </StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Paper>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-      <Grid container spacing={2}>
-        {/* Left Panel */}
-        <Grid item xs={12} md={4} lg={3}>
-          {/* Driver Card */}
-          <Paper
-            sx={{
-              p: 2,
-              mb: 2,
-              borderRadius: 3,
-              border: "1px solid #e5e7eb",
-              boxShadow: "0px 2px 8px rgba(0,0,0,0.05)",
-              bgcolor: "#fff",
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              fontWeight={600}
-              mb={1}
-              sx={{ color: "#111827" }}
-            >
-              Driver
-            </Typography>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
-              <Box display="flex" alignItems="center">
-                <Avatar sx={{ bgcolor: "#e5e7eb", mr: 2, color: "#374151" }}>J</Avatar>
-                <Box>
-                  <Typography fontWeight={600} sx={{ color: "#111827" }}>
-                    John Smith
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    +532 6129 257
-                  </Typography>
-                </Box>
-              </Box>
-              <IconButton
-                sx={{
-                  bgcolor: "#ecfdf5",
-                  "&:hover": { bgcolor: "#d1fae5" },
-                }}
-              >
-                <PhoneIcon sx={{ color: "#22c55e" }} />
-              </IconButton>
-            </Box>
-          </Paper>
+      {!loading && shipment && (
+        <Box>
+          <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+            Delivery Order #{shipment.id}
+          </Typography>
 
-          {/* Truck Info */}
-          <Paper
-            sx={{
-              p: 2,
-              borderRadius: 3,
-              border: "1px solid #e5e7eb",
-              boxShadow: "0px 2px 8px rgba(0,0,0,0.05)",
-              bgcolor: "#fff",
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              fontWeight={600}
-              mb={1}
-              display="flex"
-              alignItems="center"
-              gap={1}
-              sx={{ color: "#111827" }}
-            >
-              <LocalShippingIcon sx={{ color: "#22c55e" }} /> Truck Info
-            </Typography>
-            <Box display="flex" alignItems="center" gap={2}>
-              <Box
-                component="img"
-                src="/images/truck.png"
-                alt="truck"
-                sx={{ width: 80, height: 50, objectFit: "contain" }}
-              />
-              <Box>
-                <Typography variant="body2">Truck Number: MH-09 ABCD</Typography>
-                <Typography variant="body2">Truck: 17</Typography>
-                <Typography variant="body2">Load: 1800 kg</Typography>
-                <Typography variant="body2">Max load: 2000 kg</Typography>
-              </Box>
-            </Box>
-          </Paper>
-        </Grid>
+          <Typography variant="body2">
+            <strong>Status:</strong> {shipment.status || "N/A"}
+          </Typography>
 
-        {/* Right Panel */}
-        <Grid item xs={12} md={8} lg={9}>
-          {/* Map Section */}
-          <Paper
-            sx={{
-              p: 2,
-              mb: 2,
-              borderRadius: 3,
-              border: "1px solid #e5e7eb",
-              boxShadow: "0px 2px 8px rgba(0,0,0,0.05)",
-              bgcolor: "#fff",
-              height: 300,
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              fontWeight={600}
-              mb={1}
-              display="flex"
-              alignItems="center"
-              gap={1}
-              sx={{ color: "#111827" }}
-            >
-              <LocalShippingIcon sx={{ color: "#22c55e" }} /> Track Order
-            </Typography>
-            <Box
-              component="img"
-              src="/images/map.png"
-              alt="map"
-              sx={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 2 }}
-            />
-          </Paper>
+          <Typography variant="body2">
+            <strong>Pickup:</strong>{" "}
+            {shipment.scheduledPickupDate
+              ? new Date(shipment.scheduledPickupDate).toLocaleString()
+              : "N/A"}
+          </Typography>
 
-          {/* Order Info & ETA */}
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <Paper
-                sx={{
-                  p: 2,
-                  borderRadius: 3,
-                  border: "1px solid #e5e7eb",
-                  boxShadow: "0px 2px 8px rgba(0,0,0,0.05)",
-                  bgcolor: "#fff",
-                }}
-              >
-                <Typography
-                  variant="subtitle2"
-                  fontWeight={600}
-                  mb={1}
-                  display="flex"
-                  alignItems="center"
-                  gap={1}
-                  sx={{ color: "#111827" }}
-                >
-                  <AssignmentIcon sx={{ color: "#22c55e" }} /> Order Info
-                </Typography>
-                <Typography variant="body2">Job: #{orderId || "N/A"}</Typography>
-                <Typography variant="body2">Status: In Progress</Typography>
-              </Paper>
-            </Grid>
+          <Typography variant="body2">
+            <strong>Delivery:</strong>{" "}
+            {shipment.scheduledDeliveredDate
+              ? new Date(shipment.scheduledDeliveredDate).toLocaleString()
+              : "N/A"}
+          </Typography>
 
-            <Grid item xs={12} md={6}>
-              <Paper
-                sx={{
-                  p: 2,
-                  borderRadius: 3,
-                  border: "1px solid #e5e7eb",
-                  boxShadow: "0px 2px 8px rgba(0,0,0,0.05)",
-                  bgcolor: "#fff",
-                }}
-              >
-                <Typography
-                  variant="subtitle2"
-                  fontWeight={600}
-                  mb={1}
-                  display="flex"
-                  alignItems="center"
-                  gap={1}
-                  sx={{ color: "#111827" }}
-                >
-                  <AccessTimeIcon sx={{ color: "#22c55e" }} /> ETA
-                </Typography>
-                <Typography variant="body2" display="flex" alignItems="center" gap={1}>
-                  <CalendarTodayIcon sx={{ fontSize: 18, color: "#6b7280" }} /> Date: 24 March
-                </Typography>
-                <Typography variant="body2" display="flex" alignItems="center" gap={1}>
-                  <AccessTimeIcon sx={{ fontSize: 18, color: "#6b7280" }} /> Time: 11:00 AM
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Last update: Today at 12:10 PM
-                </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-    </Box>
+          <Typography variant="body2">
+            <strong>Driver ID:</strong> {shipment.driverId ?? "Unassigned"}
+          </Typography>
+
+          <Typography variant="body2">
+            <strong>Cost:</strong> {shipment.cost ?? "N/A"}
+          </Typography>
+
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            <strong>Notes:</strong> {shipment.notes ?? "-"}
+          </Typography>
+        </Box>
+      )}
+
+      {!loading && !shipment && !error && (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          Enter an Order ID and click <strong>Start Tracking</strong> to poll
+          the delivery order status every second.
+        </Typography>
+      )}
+    </Paper>
   );
 }
