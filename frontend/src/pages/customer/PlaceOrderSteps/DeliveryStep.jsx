@@ -21,12 +21,30 @@ const DeliveryStep = ({
   const { auth } = useAuth();
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [customer,setCustomer] = useState(null);
-  useEffect(() => {
-    if (routeData?.distance) {
-      const calculatedCost = Math.round(routeData.distance * 100);
-      setData((prev) => ({ ...prev, cost: calculatedCost }));
-    }
-  }, [routeData?.distance, setData]);
+ useEffect(() => {
+  if (routeData?.distance) {
+    // Base rate per km
+    const baseRate = 100;
+
+    // GST rate in %
+    const gstRate = 18;
+
+    // Optional fixed handling fee
+    const handlingFee = 50;
+
+    // Base cost = distance × rate
+    const baseCost = routeData.distance * baseRate;
+
+    // GST amount
+    const gstAmount = (baseCost * gstRate) / 100;
+
+    // Final cost
+    const totalCost = Math.round(baseCost + gstAmount + handlingFee);
+
+    setData((prev) => ({ ...prev, cost: totalCost }));
+  }
+}, [routeData?.distance, setData]);
+
 
   const handleChange = (e) => {
     setData((prev) => ({
@@ -34,6 +52,7 @@ const DeliveryStep = ({
       [e.target.name]: e.target.value,
     }));
   };
+
 
  const handlePayment = async () => {
   setPaymentProcessing(true);
@@ -156,7 +175,6 @@ const createDeliveryOrder = async (paymentId) => {
           ₹ {data.cost || 0}
         </Typography>
       </Box>
-
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <TextField
@@ -181,7 +199,7 @@ const createDeliveryOrder = async (paymentId) => {
         <Grid item xs={12}>
           <Button
             variant="contained"
-            color="primary"
+            color="success"
             fullWidth
             onClick={handlePayment}
             disabled={paymentProcessing}

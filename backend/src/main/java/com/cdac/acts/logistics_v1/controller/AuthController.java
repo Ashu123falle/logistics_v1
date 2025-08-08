@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cdac.acts.logistics_v1.dto.AuthRequestDTO;
 import com.cdac.acts.logistics_v1.dto.AuthResponseDTO;
+import com.cdac.acts.logistics_v1.dto.ResetPasswordRequestDTO;
 import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
 import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
+import com.cdac.acts.logistics_v1.service.OtpService;
 import com.cdac.acts.logistics_v1.service.UserService;
 
 @RestController 
@@ -20,7 +22,12 @@ import com.cdac.acts.logistics_v1.service.UserService;
 public class AuthController {
 
     @Autowired
+
     private UserService userService; // Service for user authentication and registration
+
+    @Autowired
+    private OtpService otpService;
+
 
     @PostMapping("/register") // Handles user registration
     public ResponseEntity<UserResponseDTO> register(@RequestBody UserRequestDTO request) {
@@ -42,5 +49,28 @@ public class AuthController {
                             .build());
         }
     }
+    
+    
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody String email) {
+		try {
+			userService.forgotPassword(email);
+			return ResponseEntity.ok("Password reset link sent to your email.");
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+		}
+	}
+
+
+    @PostMapping("/verify-otp")
+	public ResponseEntity<String> verifyOtp(@RequestBody ResetPasswordRequestDTO request) {
+			boolean isValid = otpService.verifyOtp(request.getEmail(), request.getOtp());
+			if (isValid) {
+				userService.resetPassword(request.getEmail(), request.getNewPassword());
+				return ResponseEntity.ok("Password reset successfully.");
+			}
+		
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP. Please try again.");
+	}
 
 }

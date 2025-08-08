@@ -2,7 +2,6 @@ package com.cdac.acts.logistics_v1.dto;
 
 import java.time.LocalDateTime;
 
-import com.cdac.acts.logistics_v1.model.DeliveryOrder;
 import lombok.*;
 
 @Data

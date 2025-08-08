@@ -27,6 +27,7 @@ import com.cdac.acts.logistics_v1.repository.RouteRepository;
 import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
 import com.cdac.acts.logistics_v1.service.DeliveryOrderService;
 import com.cdac.acts.logistics_v1.service.EmailService;
+import com.cdac.acts.logistics_v1.utilities.OtpStore;
 
 @Service
 @Transactional
@@ -40,6 +41,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    private OtpServiceImpl otpService;
 
     public DeliveryOrderServiceImpl(
             DeliveryOrderRepository deliveryOrderRepository,
@@ -122,13 +126,34 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         return mapToResponse(order);
     }
 
-
     @Override
     public DeliveryOrderResponseDTO getOrderById(Long id) {
         DeliveryOrder order = deliveryOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
         return mapToResponse(order);
     }
+    
+
+    @Override
+    public String getOrderByIdTrack(Long id) {
+        DeliveryOrder order = deliveryOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+        
+        DeliveryOrderResponseDTO orderResponse = mapToResponse(order);
+        OtpStore.tempEmailTrackOrder.put(order.getPlacedBy().getEmail(), orderResponse);
+        otpService.generateAndSendOtp(order.getPlacedBy().getEmail());
+        return "Order details have been sent to your email. Please verify using the OTP sent to your email.";
+    }
+    
+    @Override
+    public DeliveryOrderResponseDTO optVerifyOrderTrack(String email) {
+        
+    	DeliveryOrderResponseDTO responseDTO = OtpStore.tempEmailTrackOrder.get(email);
+        
+        return responseDTO ;
+    }
+    
+    
 
     @Override
     public List<DeliveryOrderResponseDTO> getAllOrders(int pageNo, int pageSize) {

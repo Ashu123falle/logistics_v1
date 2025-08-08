@@ -22,6 +22,8 @@ public interface UserService {
     // Extras
     AdminDashboardDTO getAdminDashboard();
     List<UserResponseDTO> findUsersByRole(String role);
+	String forgotPassword(String email);
+	void resetPassword(String email, String newPassword);
     
 
 }

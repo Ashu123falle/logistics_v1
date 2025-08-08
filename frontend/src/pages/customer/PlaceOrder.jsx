@@ -79,6 +79,7 @@ const PlaceOrder = () => {
             setData={setDeliveryData}
             shipmentId={shipmentId}
             shipmentData={shipmentData}
+
             routeId={routeId}
             customerId={currentUser.customerId}
             routeData={routeData}

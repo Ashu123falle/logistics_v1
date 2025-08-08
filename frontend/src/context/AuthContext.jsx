@@ -16,8 +16,9 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-    console.log(token);
-    
+
+   
+
     if (token) {
       try {
         const decoded = jwtDecode(token);

@@ -32,6 +32,7 @@ const DriverSidebar = ({ drawerWidth, mobileOpen, handleDrawerToggle, isMobile }
   const [loading, setLoading] = useState(true);
   const driverId = auth?.userId;
   const navigate = useNavigate();
+  const location = useLocation(); // <-- used for active item detection
 
   const location = useLocation(); 
 
@@ -72,10 +73,12 @@ const DriverSidebar = ({ drawerWidth, mobileOpen, handleDrawerToggle, isMobile }
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
       <Box>
         <Box sx={{ p: 2, textAlign: "center" }}>
+
           <Avatar sx={{ width: 64, height: 64, margin: "0 auto" }}>
             {`${driver?.firstName?.[0] || ""}${driver?.lastName?.[0] || ""}`.toUpperCase()}
 
           </Avatar>
+
           {loading ? (
             <Box sx={{ mt: 1 }}>
               <CircularProgress size={20} />

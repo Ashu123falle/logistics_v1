@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import { Box, Typography, Button, Paper } from "@mui/material";
 import jsPDF from "jspdf";
@@ -15,6 +16,7 @@ const OrderSummary = ({ order, onFinish }) => {
 
     doc.text("MoveBiz Logistics - Invoice", 14, 20);
     autoTable(doc, {
+
       startY: 30,
       head: [["Field", "Value"]],
       body: [
@@ -22,6 +24,7 @@ const OrderSummary = ({ order, onFinish }) => {
         ["Shipment ID", order.shipmentId],
         ["Route ID", order.routeId],
         ["Cost", `₹ ${order.cost}`],
+
         ["Status", order.status],
         ["Pickup Date", order.scheduledPickupDate],
         ["Notes", order.notes || "-"],
@@ -30,6 +33,7 @@ const OrderSummary = ({ order, onFinish }) => {
 
     doc.save(`Invoice_Order_${order.id}.pdf`);
   };
+
 
   // Timer for auto redirect
   useEffect(() => {
@@ -46,6 +50,7 @@ const OrderSummary = ({ order, onFinish }) => {
 
     return () => clearInterval(timerRef.current);
   }, [navigate]);
+
 
   return (
     <Paper sx={{ p: 4 }}>
@@ -72,6 +77,7 @@ const OrderSummary = ({ order, onFinish }) => {
         <strong>Pickup:</strong> {order.scheduledPickupDate}
       </Typography>
 
+
       <Typography
         variant="caption"
         color="text.secondary"
@@ -81,10 +87,12 @@ const OrderSummary = ({ order, onFinish }) => {
         Redirecting to dashboard in {countdown} seconds...
       </Typography>
 
+
       <Box mt={3}>
         <Button variant="outlined" onClick={generateInvoice} sx={{ mr: 2 }}>
           Download Invoice
         </Button>
+
         <Button
           variant="contained"
           onClick={() => {
@@ -92,6 +100,7 @@ const OrderSummary = ({ order, onFinish }) => {
             onFinish();
           }}
         >
+
           Place Another Order
         </Button>
       </Box>

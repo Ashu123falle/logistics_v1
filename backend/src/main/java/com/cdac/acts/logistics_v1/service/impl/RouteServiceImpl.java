@@ -204,7 +204,7 @@ public class RouteServiceImpl implements RouteService {
             routeEntity.setCreatedAt(LocalDateTime.now());
 
     	    Route saved = routeRepository.save(routeEntity);
-    	    return mapToResponseDTO(routeEntity);
+    	    return mapToResponseDTO(saved);
     	} else {
     	    throw new RuntimeException("Invalid response from routing API: " + response.getStatusCode());
     	}

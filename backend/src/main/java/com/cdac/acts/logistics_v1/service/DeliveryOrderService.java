@@ -10,10 +10,12 @@ public interface DeliveryOrderService {
     // Create a new delivery order
     DeliveryOrderResponseDTO createOrder(DeliveryOrderRequestDTO request);
 
+
     // Retrieve a delivery order by its ID
     DeliveryOrderResponseDTO getOrderById(Long id);
 
     // Retrieve all delivery orders with pagination
+
     List<DeliveryOrderResponseDTO> getAllOrders(int pageNo, int pageSize);
 
     // Update an existing delivery order by ID
@@ -30,4 +32,7 @@ public interface DeliveryOrderService {
 
     // Update the status of a delivery order
     DeliveryOrderResponseDTO updateStatus(Long id, String status);
+	DeliveryOrderResponseDTO getOrderById(Long id);
+	DeliveryOrderResponseDTO optVerifyOrderTrack(String email);
+	String getOrderByIdTrack(Long id);
 }

@@ -30,6 +30,7 @@ public class ShipmentController {
     @Autowired
     private ShipmentService shipmentService;
 
+
     // Create a new shipment
     @PostMapping
     public ResponseEntity<ShipmentResponseDTO> createShipment(@RequestBody ShipmentRequestDTO request) {

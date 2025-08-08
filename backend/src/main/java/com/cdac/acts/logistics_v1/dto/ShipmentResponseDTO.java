@@ -1,6 +1,5 @@
 package com.cdac.acts.logistics_v1.dto;
 
-import com.cdac.acts.logistics_v1.model.Shipment;
 import lombok.*;
 
 @Data
