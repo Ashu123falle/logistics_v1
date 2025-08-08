@@ -21,8 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.cdac.acts.logistics_v1.dto.ImageResponseDTO;
 import com.cdac.acts.logistics_v1.dto.ShipmentRequestDTO;
 import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
-import com.cdac.acts.logistics_v1.model.Shipment;
-import com.cdac.acts.logistics_v1.service.ImageUploadService;
 import com.cdac.acts.logistics_v1.service.ShipmentService;
 
 @RestController
@@ -32,8 +30,6 @@ public class ShipmentController {
     @Autowired
     private ShipmentService shipmentService;
 
-    @Autowired
-    private ImageUploadService imageUploadService;
 
 //    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','DRIVER')")
     @PostMapping

@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -48,7 +46,10 @@ public class UserServiceImpl implements UserService {
     private final DriverRepository driverRepository;
     
     private final DeliveryOrderRepository deliveryOrderRepository;
-
+    
+    @Autowired
+    private final OtpServiceImpl otpService;
+    
     private UserResponseDTO mapToResponseDTO(User user) {
         return UserResponseDTO.builder()
                 .userId(user.getUserId())
@@ -177,5 +178,28 @@ public class UserServiceImpl implements UserService {
                 .totalRevenue(totalRevenue != null ? totalRevenue : 0.0)
                 .build();
     }
+
+	@Override
+	public String forgotPassword(String email) {
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+		String userEmail = user.getEmail();
+		if (userEmail != null && !userEmail.isEmpty()) {
+			otpService.generateAndSendOtp(userEmail);
+			return "Password reset link sent to your email.";
+		}
+		
+		return "Error: Email not found for the user.";
+	}
+
+	@Override
+	public void resetPassword(String email, String newPassword) {
+		
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+		
+		user.setPassword(passwordEncoder.encode(newPassword));
+		userRepository.save(user);
+	}
 
 }
