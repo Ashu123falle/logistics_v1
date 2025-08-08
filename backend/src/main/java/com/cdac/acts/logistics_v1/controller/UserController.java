@@ -1,16 +1,9 @@
 package com.cdac.acts.logistics_v1.controller;
 
-import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
-import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
-import com.cdac.acts.logistics_v1.service.UserService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cdac.acts.logistics_v1.dto.AdminDashboardDTO;
 import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
 import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
 import com.cdac.acts.logistics_v1.service.UserService;
@@ -28,27 +22,28 @@ import com.cdac.acts.logistics_v1.service.UserService;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/user")
-
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-
+    // Create a new user
     @PostMapping
-    public ResponseEntity<String> addUser( @RequestBody UserRequestDTO userDTO) {
-        userService.createUser(userDTO);
+    public ResponseEntity<String> addUser(@RequestBody UserRequestDTO userDTO) {
+        userService.register(userDTO);
         return ResponseEntity.ok("User created successfully.");
     }
 
+    // Update existing user by ID
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable Long id,  @RequestBody UserRequestDTO userDTO) {
+    public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody UserRequestDTO userDTO) {
         boolean updated = userService.updateUser(id, userDTO) != null;
         return updated
                 ? ResponseEntity.ok("User updated successfully.")
                 : ResponseEntity.badRequest().body("User could not be updated.");
     }
 
+    // Delete a user by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.deleteUser(id);
@@ -57,16 +52,24 @@ public class UserController {
                 : ResponseEntity.badRequest().body("User could not be deleted.");
     }
 
+    // Get all users
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    // Get user details by ID
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         UserResponseDTO user = userService.getUserById(id);
         return user != null
                 ? ResponseEntity.ok(user)
                 : ResponseEntity.notFound().build();
+    }
+    
+    // Get admin dashboard statistics
+    @GetMapping("/dashboard")
+    public ResponseEntity<AdminDashboardDTO> getDashboard() {
+        return ResponseEntity.ok(userService.getAdminDashboard());
     }
 }

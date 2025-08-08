@@ -1,28 +1,58 @@
 package com.cdac.acts.logistics_v1.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
+import com.cdac.acts.logistics_v1.dto.AdminDashboardDTO;
+
+import com.cdac.acts.logistics_v1.dto.AuthRequestDTO;
+import com.cdac.acts.logistics_v1.dto.AuthResponseDTO;
 import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
 import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
+import com.cdac.acts.logistics_v1.enums.DeliveryStatus;
+import com.cdac.acts.logistics_v1.enums.Role;
+import com.cdac.acts.logistics_v1.enums.UserStatus;
 import com.cdac.acts.logistics_v1.model.User;
+import com.cdac.acts.logistics_v1.repository.DeliveryOrderRepository;
+import com.cdac.acts.logistics_v1.repository.DriverRepository;
 import com.cdac.acts.logistics_v1.repository.UserRepository;
 import com.cdac.acts.logistics_v1.service.UserService;
+import com.cdac.acts.logistics_v1.utilities.JwtUtil;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
 
+	  private final AuthenticationManager authenticationManager;
+
+	  private final JwtUtil jwtUtil;
+	
+    private final PasswordEncoder passwordEncoder;
+
+    private final UserRepository userRepository;
+    
+    private final DriverRepository driverRepository;
+    
+    private final DeliveryOrderRepository deliveryOrderRepository;
+    
+    @Autowired
+    private final OtpServiceImpl otpService;
+    
     private UserResponseDTO mapToResponseDTO(User user) {
         return UserResponseDTO.builder()
                 .userId(user.getUserId())
-
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .username(user.getUsername())
@@ -38,7 +68,7 @@ public class UserServiceImpl implements UserService {
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
                 .username(dto.getUsername())
-                .password(dto.getPassword())
+                .password(passwordEncoder.encode(dto.getPassword())) // ✅ Secure password
                 .email(dto.getEmail())
                 .phoneNumber(dto.getPhoneNumber())
                 .role(dto.getRole())
@@ -46,9 +76,8 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-
     @Override
-    public UserResponseDTO createUser(UserRequestDTO request) {
+    public UserResponseDTO register(UserRequestDTO request) {
         User user = mapToEntity(request);
         user = userRepository.save(user);
         return mapToResponseDTO(user);
@@ -57,7 +86,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
         return mapToResponseDTO(user);
     }
 
@@ -71,12 +100,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO updateUser(Long id, UserRequestDTO request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());        
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
 
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
         user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
         user.setPhoneNumber(request.getPhoneNumber());
         user.setRole(request.getRole());
@@ -98,16 +127,80 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDTO> findUsersByRole(String role) {
-        return userRepository.findByRole(role).stream()
+        Role roleEnum = Role.valueOf(role.toUpperCase()); // safer enum conversion
+        return userRepository.findByRole(roleEnum).stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public UserResponseDTO authenticate(String username, String password) {
-        Optional<User> optionalUser = userRepository.findByUsernameAndPassword(username, password);
-        return optionalUser.map(this::mapToResponseDTO)
-                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
-    }
-}
+    public AuthResponseDTO authenticate(AuthRequestDTO request) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
 
+            if (authentication.isAuthenticated()) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+                // You can cast and retrieve User object for additional info
+                User user = userRepository.findByUsername(request.getUsername())
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+
+                String token = jwtUtil.generateToken(userDetails); // or jwtUtil.generateToken(user)
+                 System.out.println(user.toString());
+                return AuthResponseDTO.builder()
+                        .token(token)
+                        .message("Login successful")
+//                        .userId(user.getUserId())
+//                        .username(user.getUsername())
+//                        .role(user.getRole().name())
+                        .build();
+            } else {
+                throw new RuntimeException("Authentication failed");
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid credentials", e);
+        }
+    }
+
+    @Override
+    public AdminDashboardDTO getAdminDashboard() {
+        Long totalDrivers = driverRepository.count();
+        Long activeDrivers = driverRepository.countByStatus(UserStatus.ACTIVE);
+        Long pendingOrders = deliveryOrderRepository.countByStatus(DeliveryStatus.PENDING); // or whatever your status enum/string is
+        Double totalRevenue = deliveryOrderRepository.sumAllDeliveredOrderCosts();
+
+        return AdminDashboardDTO.builder()
+                .totalDrivers(totalDrivers)
+                .activeDrivers(activeDrivers)
+                .pendingOrders(pendingOrders)
+                .totalRevenue(totalRevenue != null ? totalRevenue : 0.0)
+                .build();
+    }
+
+	@Override
+	public String forgotPassword(String email) {
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+		String userEmail = user.getEmail();
+		if (userEmail != null && !userEmail.isEmpty()) {
+			otpService.generateAndSendOtp(userEmail);
+			return "Password reset link sent to your email.";
+		}
+		
+		return "Error: Email not found for the user.";
+	}
+
+	@Override
+	public void resetPassword(String email, String newPassword) {
+		
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+		
+		user.setPassword(passwordEncoder.encode(newPassword));
+		userRepository.save(user);
+	}
+
+}

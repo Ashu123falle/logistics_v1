@@ -1,12 +1,16 @@
 package com.cdac.acts.logistics_v1.configurations;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -14,11 +18,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.cdac.acts.logistics_v1.service.impl.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -30,12 +38,48 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
+        		.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests
+                		.requestMatchers("/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html").permitAll()
+                                       
+                		.requestMatchers("/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html").permitAll()
+
+
+                		.requestMatchers(HttpMethod.POST, "/api/customer/register-customer").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/customer/verify-customer-otp").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/driver/register-driver").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/driver/verify-driver-otp").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/routes").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/payment/create").permitAll()
+                		.requestMatchers(HttpMethod.POST, "/api/payment/verify").permitAll()
+
+
+                		
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/driver/**").hasRole("DRIVER")
-                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+
+                        .requestMatchers("/api/user/**").hasRole("ADMIN")
+                        
+                        .requestMatchers(HttpMethod.POST, "/api/customers").permitAll()
+                        
+                        .requestMatchers("/api/customer/**").hasAnyRole("CUSTOMER", "ADMIN","DRIVER")
+
+                        .requestMatchers("/api/delivery-orders/**").hasAnyRole("CUSTOMER","ADMIN","DRIVER")
+
+                        .requestMatchers(HttpMethod.POST, "/api/drivers").permitAll()
+                        
+                        .requestMatchers("/api/drivers/**").hasAnyRole("DRIVER","ADMIN") 
+                        
+                        .requestMatchers("/api/routes/**").hasAnyRole("DRIVER","ADMIN")   
+                     
+                        .requestMatchers("/api/payment/**").hasAnyRole("CUSTOMER","ADMIN")
+                        
+                        .requestMatchers("/api/shipments/**").permitAll()
+
+//                        .requestMatchers("/api/shipments/**").hasAnyRole("CUSTOMER","ADMIN","DRIVER")
+                   
+                        .requestMatchers("/api/vehicles/**").hasAnyRole("DRIVER","ADMIN")
+                                       
                         .anyRequest().authenticated())
                 .sessionManagement(management -> management
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -65,4 +109,21 @@ public class SecurityConfig {
                 .and()
                 .build();
     }
+    
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        
+
+        config.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://127.0.0.1:5500" ,"http://localhost:5173","http://localhost:5174","https://logistics-v1.vercel.app/")); 
+
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH","OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
 }

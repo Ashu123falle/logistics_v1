@@ -9,6 +9,8 @@ import java.util.Map;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.cdac.acts.logistics_v1.service.impl.CustomUserDetails;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -26,7 +28,11 @@ public class JwtUtil {
 		String role = userDetails.getAuthorities().stream().findFirst().map(auth -> auth.getAuthority())
 				.orElse("ROLE_USER");
 
-		claims.put("authorities", role); // Store role as a simple string
+		claims.put("authorities", role);
+		
+		if (userDetails instanceof CustomUserDetails) {
+		    claims.put("userId", ((CustomUserDetails) userDetails).getId());
+		}
 
 		return Jwts.builder().setClaims(claims).setSubject(userDetails.getUsername())
 				.setIssuedAt(new Date(System.currentTimeMillis()))
@@ -34,6 +40,29 @@ public class JwtUtil {
 				.signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
 	}
 
+//	public String generateToken(UserDetails userDetails) {
+//	    Map<String, Object> claims = new HashMap<>();
+//
+//	    List<String> roles = userDetails.getAuthorities().stream()
+//	        .map(auth -> auth.getAuthority())
+//	        .toList(); // ✅ or use .collect(Collectors.toList())
+//
+//	    claims.put("authorities", roles);
+//
+//	    if (userDetails instanceof CustomUserDetails) {
+//	        claims.put("userId", ((CustomUserDetails) userDetails).getId());
+//	    }
+//
+//	    return Jwts.builder()
+//	        .setClaims(claims)
+//	        .setSubject(userDetails.getUsername())
+//	        .setIssuedAt(new Date(System.currentTimeMillis()))
+//	        .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
+//	        .signWith(getSignKey(), SignatureAlgorithm.HS256)
+//	        .compact();
+//	}
+
+	
 	// Validate token against username and expiration
 	public boolean isTokenValid(String token, UserDetails userDetails) {
 		final String username = extractUsername(token);
@@ -65,4 +94,9 @@ public class JwtUtil {
 		byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
 		return Keys.hmacShaKeyFor(keyBytes);
 	}
+	public Long extractUserId(String token) {
+	    Object id = extractAllClaims(token).get("userId");
+	    return id != null ? Long.valueOf(id.toString()) : null;
+	}
+
 }

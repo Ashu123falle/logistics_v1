@@ -6,13 +6,16 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.cdac.acts.logistics_v1.dto.ImageResponseDTO;
 import com.cdac.acts.logistics_v1.dto.ShipmentRequestDTO;
 import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
 import com.cdac.acts.logistics_v1.model.Customer;
 import com.cdac.acts.logistics_v1.model.Shipment;
 import com.cdac.acts.logistics_v1.repository.CustomerRepository;
 import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
+import com.cdac.acts.logistics_v1.service.ImageUploadService;
 import com.cdac.acts.logistics_v1.service.ShipmentService;
 
 @Service
@@ -24,6 +27,9 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private ImageUploadService imageUploadService;
+    
     @Override
     public ShipmentResponseDTO createShipment(ShipmentRequestDTO request) {
         Shipment shipment = mapToEntity(request);
@@ -89,8 +95,9 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     // Utility methods
     private Shipment mapToEntity(ShipmentRequestDTO dto) {
+  
         Customer customer = customerRepository.findById(dto.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new RuntimeException("Customer not found id: " + dto.getCustomerId()));
 
         return Shipment.builder()
                 .type(dto.getType())
@@ -116,4 +123,19 @@ public class ShipmentServiceImpl implements ShipmentService {
                 .customerId(shipment.getCustomer().getUserId())
                 .build();
     }
+
+	@Override
+	public ImageResponseDTO uploadImages(Long shipmentId, List<MultipartFile> images) {
+		Shipment updateShipment = shipmentRepository.findById(shipmentId)
+                                                    .orElseThrow(() -> new RuntimeException("Shipment not found id: " + shipmentId));
+		List<String> imagesUrl = imageUploadService.uploadMultipleImages(images);
+		updateShipment.setImages(imagesUrl);
+		shipmentRepository.save(updateShipment);
+		
+		return ImageResponseDTO.builder()
+				               .customerId(updateShipment.getCustomer().getUserId())
+				               .shipmentId(updateShipment.getId())
+				               .imageUrls(updateShipment.getImages())
+				               .build();
+	}
 }

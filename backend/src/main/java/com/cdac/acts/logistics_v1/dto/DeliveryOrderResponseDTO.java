@@ -2,7 +2,6 @@ package com.cdac.acts.logistics_v1.dto;
 
 import java.time.LocalDateTime;
 
-import com.cdac.acts.logistics_v1.model.DeliveryOrder;
 import lombok.*;
 
 @Data
@@ -13,6 +12,8 @@ public class DeliveryOrderResponseDTO {
     private Long shipmentId;
     private Long routeId;
     private Long driverId;
+    private Long customerId;
+    private Long paymentId;
     private Double cost;
     private String status;
     private LocalDateTime scheduledPickupDate;

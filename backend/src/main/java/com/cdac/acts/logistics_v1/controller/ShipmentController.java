@@ -1,43 +1,54 @@
 package com.cdac.acts.logistics_v1.controller;
 
-import com.cdac.acts.logistics_v1.dto.ShipmentRequestDTO;
-import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
-import com.cdac.acts.logistics_v1.service.ShipmentService;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import com.cdac.acts.logistics_v1.dto.ImageResponseDTO;
+import com.cdac.acts.logistics_v1.dto.ShipmentRequestDTO;
+import com.cdac.acts.logistics_v1.dto.ShipmentResponseDTO;
+import com.cdac.acts.logistics_v1.service.ShipmentService;
 
 @RestController
 @RequestMapping("/api/shipments")
-@CrossOrigin(origins = "*")
 public class ShipmentController {
 
     @Autowired
     private ShipmentService shipmentService;
 
-    // ✅ Create Shipment
+
+    // Create a new shipment
     @PostMapping
     public ResponseEntity<ShipmentResponseDTO> createShipment(@RequestBody ShipmentRequestDTO request) {
+        System.out.println("in add method !!!!");
         ShipmentResponseDTO shipment = shipmentService.createShipment(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(shipment);
     }
 
-    // ✅ Get Shipment by ID
+    // Get shipment by ID
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'DRIVER')")
     @GetMapping("/{id}")
     public ResponseEntity<ShipmentResponseDTO> getShipmentById(@PathVariable Long id) {
         ShipmentResponseDTO shipment = shipmentService.getShipmentById(id);
-        if (shipment != null) {
-            return ResponseEntity.ok(shipment);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return shipment != null ? ResponseEntity.ok(shipment) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    // ✅ Get All Shipments with Pagination
+    // Get all shipments (paginated)
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<ShipmentResponseDTO>> getAllShipments(
             @RequestParam(defaultValue = "1") int pageNo,
@@ -46,31 +57,26 @@ public class ShipmentController {
         return ResponseEntity.ok(shipments);
     }
 
-    // ✅ Update Shipment
+    // Update an existing shipment
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PutMapping("/{id}")
     public ResponseEntity<ShipmentResponseDTO> updateShipment(
             @PathVariable Long id,
             @RequestBody ShipmentRequestDTO request) {
         ShipmentResponseDTO updatedShipment = shipmentService.updateShipment(id, request);
-        if (updatedShipment != null) {
-            return ResponseEntity.ok(updatedShipment);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return updatedShipment != null ? ResponseEntity.ok(updatedShipment) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    // ✅ Delete Shipment
+    // Delete shipment by ID
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteShipment(@PathVariable Long id) {
         boolean deleted = shipmentService.deleteShipment(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build(); // 204 No Content
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    // ✅ Get Shipments by Type with Pagination
+    // Get shipments by type (paginated)
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'DRIVER')")
     @GetMapping("/type/{type}")
     public ResponseEntity<List<ShipmentResponseDTO>> getShipmentsByType(
             @PathVariable String type,
@@ -78,5 +84,14 @@ public class ShipmentController {
             @RequestParam(defaultValue = "10") int pageSize) {
         List<ShipmentResponseDTO> shipments = shipmentService.getShipmentsByType(type, pageNo - 1, pageSize);
         return ResponseEntity.ok(shipments);
+    }
+
+    // Upload images for a shipment
+    @PreAuthorize("hasRole('DRIVER')")
+    @PostMapping(value = "/upload-images", consumes = "multipart/form-data")
+    public ResponseEntity<ImageResponseDTO> upload(@RequestPart("images") List<MultipartFile> images,
+                                                   @RequestParam Long shipmentId) {
+        ImageResponseDTO imageUrl = shipmentService.uploadImages(shipmentId, images);
+        return ResponseEntity.ok(imageUrl);
     }
 }

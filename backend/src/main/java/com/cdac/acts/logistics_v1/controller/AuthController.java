@@ -1,17 +1,9 @@
 package com.cdac.acts.logistics_v1.controller;
 
-import java.time.LocalDateTime;
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,86 +11,66 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cdac.acts.logistics_v1.dto.AuthRequestDTO;
 import com.cdac.acts.logistics_v1.dto.AuthResponseDTO;
+import com.cdac.acts.logistics_v1.dto.ResetPasswordRequestDTO;
 import com.cdac.acts.logistics_v1.dto.UserRequestDTO;
 import com.cdac.acts.logistics_v1.dto.UserResponseDTO;
-import com.cdac.acts.logistics_v1.model.User;
-import com.cdac.acts.logistics_v1.repository.UserRepository;
-import com.cdac.acts.logistics_v1.utilities.JwtUtil;
+import com.cdac.acts.logistics_v1.service.OtpService;
+import com.cdac.acts.logistics_v1.service.UserService;
 
-@RestController
-@RequestMapping("api/auth")
+@RestController 
+@RequestMapping("/api/auth") 
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+
+    private UserService userService; // Service for user authentication and registration
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private OtpService otpService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
-//    @Autowired
-//    private UserDetailsService userDetailsService;
-    
-    @Autowired
-    private UserRepository userRepository;
+    @PostMapping("/register") // Handles user registration
+    public ResponseEntity<UserResponseDTO> register(@RequestBody UserRequestDTO request) {
+        return ResponseEntity.status(201).body(userService.register(request)); // Returns created user with 201 status
+    }
 
-    @PostMapping("/login")
+    @PostMapping("/login") // Handles user login
     public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO request) {
         try {
-        	System.out.println(request.getPassword());
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-
-            if (authentication.isAuthenticated()) {
-                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                String token = jwtUtil.generateToken(userDetails);
-                return ResponseEntity.ok(new AuthResponseDTO(token));
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new AuthResponseDTO("Invalid credentials"));
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new AuthResponseDTO("Invalid credentials"));
+            AuthResponseDTO response = userService.authenticate(request); // Authenticate user
+            return ResponseEntity.ok(response); // Return successful authentication response
+        } catch (RuntimeException e) {
+            // Return error response if authentication fails
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(AuthResponseDTO.builder()
+                            .message("Login failed: " + e.getMessage())
+                            .token(null)
+                            .build());
         }
     }
     
     
-    @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> register(@RequestBody UserRequestDTO request) {
-        // Check if username or email already 
-    	System.out.println(request.getPassword());
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build(); // 409
-        }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody String email) {
+		try {
+			userService.forgotPassword(email);
+			return ResponseEntity.ok("Password reset link sent to your email.");
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+		}
+	}
 
-        User newUser = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .email(request.getEmail())
-                .phoneNumber(request.getPhoneNumber())
-                .role(request.getRole())
-                .status(request.getStatus())
-                .createdAt(LocalDateTime.now())
-                .build();
 
-        User savedUser = userRepository.save(newUser);
+    @PostMapping("/verify-otp")
+	public ResponseEntity<String> verifyOtp(@RequestBody ResetPasswordRequestDTO request) {
+			boolean isValid = otpService.verifyOtp(request.getEmail(), request.getOtp());
+			if (isValid) {
+				userService.resetPassword(request.getEmail(), request.getNewPassword());
+				return ResponseEntity.ok("Password reset successfully.");
+			}
+		
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP. Please try again.");
+	}
 
-        UserResponseDTO response = UserResponseDTO.builder()
-                .userId(savedUser.getUserId())
-                .firstName(savedUser.getFirstName())
-                .lastName(savedUser.getLastName())
-                .username(savedUser.getUsername())
-                .email(savedUser.getEmail())
-                .phoneNumber(savedUser.getPhoneNumber())
-                .role(savedUser.getRole())
-                .status(savedUser.getStatus())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
 }
