@@ -13,12 +13,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/routes")
-@RequiredArgsConstructor  // ✅ Constructor Injection (Best Practice)
+@RequiredArgsConstructor 
 public class RouteController {
 
     private final RouteService routeService;
 
-    //  Create Route (will call OpenRouteService internally)
     @PostMapping
     public ResponseEntity<RouteResponseDTO> createRoute(@RequestBody RouteRequestDTO requestDTO) {
         RouteResponseDTO createdRoute = routeService.createRoute(requestDTO);
@@ -43,7 +42,7 @@ public class RouteController {
         return ResponseEntity.ok(routes);
     }
 
-    // ✅ Update route by ID (calls OpenRouteService again with new coordinates)
+    // Update route by ID (calls OpenRouteService again with new coordinates)
     @PutMapping("/{id}")
     public ResponseEntity<RouteResponseDTO> updateRoute(@PathVariable Long id, @RequestBody RouteRequestDTO requestDTO) {
         RouteResponseDTO updatedRoute = routeService.updateRoute(id, requestDTO);

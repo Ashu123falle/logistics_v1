@@ -11,6 +11,7 @@ public class DeliveryOrderRequestDTO {
     private Long shipmentId;
     private Long routeId;
     private Long driverId;
+    private Long paymentId;
     private Double cost;
     private String status;
     private LocalDateTime scheduledPickupDate;

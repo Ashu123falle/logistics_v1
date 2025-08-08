@@ -3,6 +3,7 @@ package com.cdac.acts.logistics_v1.model;
 import java.time.LocalDateTime;
 
 import com.cdac.acts.logistics_v1.enums.DeliveryStatus;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -43,7 +44,10 @@ public class DeliveryOrder {
     @ManyToOne
     @JoinColumn(name = "placed_by")
     private Customer placedBy;
-
+    
+    @JsonManagedReference
+    @OneToOne(mappedBy = "deliveryOrder") 
+    private Payment payment;
 
     private Double cost;
 
