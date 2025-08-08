@@ -13,7 +13,8 @@ import {
 } from "@mui/material";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
-import { API } from "../../../utilities/api"
+import { API } from "../../../utilities/api";
+
 const defaultPosition = [19.0760, 72.8777]; // Mumbai
 
 const PinSelector = ({ onSelect }) => {
@@ -30,9 +31,15 @@ const RouteStep = ({ data, setData, onContinue }) => {
   const [showDestMap, setShowDestMap] = useState(false);
   const [markerPosition, setMarkerPosition] = useState(defaultPosition);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+
+  // Validation errors state
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
+    // Clear error on change
+    setErrors((prev) => ({ ...prev, [e.target.name]: "" }));
   };
 
   const handlePinConfirm = (type) => {
@@ -43,11 +50,21 @@ const RouteStep = ({ data, setData, onContinue }) => {
       [`${type}Longitude`]: lng,
     };
     setData(updatedData);
+    setSnackbarSeverity("success");
     setSnackbarMessage(
-      `Pinned ${type === "source" ? "Source" : "Destination"} Location at [${lat.toFixed(4)}, ${lng.toFixed(4)}]`
+      `Pinned ${type === "source" ? "Source" : "Destination"} Location at [${lat.toFixed(
+        4
+      )}, ${lng.toFixed(4)}]`
     );
     if (type === "source") setShowSourceMap(false);
     else setShowDestMap(false);
+
+    // Clear related coordinate errors on pin
+    setErrors((prev) => ({
+      ...prev,
+      [`${type}Latitude`]: "",
+      [`${type}Longitude`]: "",
+    }));
   };
 
   const renderMapDialog = (type) => {
@@ -61,11 +78,7 @@ const RouteStep = ({ data, setData, onContinue }) => {
       >
         <DialogTitle>{`Select ${type === "source" ? "Source" : "Destination"} Location`}</DialogTitle>
         <DialogContent>
-          <MapContainer
-            center={defaultPosition}
-            zoom={13}
-            style={{ height: "300px", width: "100%" }}
-          >
+          <MapContainer center={defaultPosition} zoom={13} style={{ height: "300px", width: "100%" }}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution="&copy; OpenStreetMap contributors"
@@ -78,12 +91,7 @@ const RouteStep = ({ data, setData, onContinue }) => {
             />
             <PinSelector onSelect={setMarkerPosition} />
           </MapContainer>
-          <Button
-            variant="contained"
-            fullWidth
-            sx={{ mt: 2 }}
-            onClick={() => handlePinConfirm(type)}
-          >
+          <Button variant="contained" fullWidth sx={{ mt: 2 }} onClick={() => handlePinConfirm(type)}>
             Confirm Location
           </Button>
         </DialogContent>
@@ -91,8 +99,47 @@ const RouteStep = ({ data, setData, onContinue }) => {
     );
   };
 
+  // Validation function
+  const validate = () => {
+    const newErrors = {};
+
+    if (!data.sourceAddress || data.sourceAddress.trim() === "") {
+      newErrors.sourceAddress = "Source Address is required";
+    }
+    if (!data.destinationAddress || data.destinationAddress.trim() === "") {
+      newErrors.destinationAddress = "Destination Address is required";
+    }
+    if (
+      data.sourceLatitude === undefined ||
+      data.sourceLatitude === null ||
+      data.sourceLongitude === undefined ||
+      data.sourceLongitude === null
+    ) {
+      newErrors.sourceLatitude = "Source location must be pinned on the map";
+      newErrors.sourceLongitude = "Source location must be pinned on the map";
+    }
+    if (
+      data.destinationLatitude === undefined ||
+      data.destinationLatitude === null ||
+      data.destinationLongitude === undefined ||
+      data.destinationLongitude === null
+    ) {
+      newErrors.destinationLatitude = "Destination location must be pinned on the map";
+      newErrors.destinationLongitude = "Destination location must be pinned on the map";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0; // valid if no errors
+  };
+
   const handleSaveAndContinue = async () => {
-    const token = localStorage.getItem("token");
+    if (!validate()) {
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Please fix validation errors before continuing.");
+      return;
+    }
+
     const routePayload = {
       sourceAddress: data.sourceAddress,
       destinationAddress: data.destinationAddress,
@@ -101,23 +148,18 @@ const RouteStep = ({ data, setData, onContinue }) => {
       destinationLatitude: data.destinationLatitude,
       destinationLongitude: data.destinationLongitude,
     };
-    console.log(routePayload);
-    
-    try {
 
+    try {
       const response = await API.post("/routes", routePayload);
       const resData = response.data;
-      console.log(resData);
       setData(resData);
-        // setSnackbarMessage("✅ Route saved successfully! id:" +resData.id);
-
-        if (onContinue) onContinue(resData);
-
-      
+      setSnackbarSeverity("success");
+      setSnackbarMessage("Route saved successfully!");
+      if (onContinue) onContinue(resData);
     } catch (error) {
-
       console.error("❌ Error saving route:", error);
-      alert("❌ Network error or try choosing reachable coordinates");
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Network error or invalid coordinates. Please try again.");
     }
   };
 
@@ -134,10 +176,17 @@ const RouteStep = ({ data, setData, onContinue }) => {
             name="sourceAddress"
             value={data.sourceAddress || ""}
             onChange={handleChange}
+            error={!!errors.sourceAddress}
+            helperText={errors.sourceAddress}
           />
           <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setShowSourceMap(true)}>
             Pin Source Location
           </Button>
+          {(errors.sourceLatitude || errors.sourceLongitude) && (
+            <Typography color="error" variant="caption">
+              Source location must be pinned on the map.
+            </Typography>
+          )}
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
@@ -146,10 +195,17 @@ const RouteStep = ({ data, setData, onContinue }) => {
             name="destinationAddress"
             value={data.destinationAddress || ""}
             onChange={handleChange}
+            error={!!errors.destinationAddress}
+            helperText={errors.destinationAddress}
           />
           <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setShowDestMap(true)}>
             Pin Destination Location
           </Button>
+          {(errors.destinationLatitude || errors.destinationLongitude) && (
+            <Typography color="error" variant="caption">
+              Destination location must be pinned on the map.
+            </Typography>
+          )}
         </Grid>
       </Grid>
 
@@ -167,10 +223,11 @@ const RouteStep = ({ data, setData, onContinue }) => {
 
       <Snackbar
         open={!!snackbarMessage}
-        autoHideDuration={3000}
+        autoHideDuration={4000}
         onClose={() => setSnackbarMessage("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert severity="success" onClose={() => setSnackbarMessage("")}>
+        <Alert severity={snackbarSeverity} onClose={() => setSnackbarMessage("")} sx={{ width: "100%" }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

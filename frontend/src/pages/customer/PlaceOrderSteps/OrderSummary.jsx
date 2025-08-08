@@ -41,7 +41,7 @@ const OrderSummary = ({ order, onFinish }) => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
-          navigate("driver/dashboard");
+          navigate("/customer/dashboard"); 
           return 0;
         }
         return prev - 1;

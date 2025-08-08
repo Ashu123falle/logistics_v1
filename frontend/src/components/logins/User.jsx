@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Grid,
   Box,
@@ -17,7 +18,6 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import './User.css';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext'; 
 import { jwtDecode } from "jwt-decode"; 
 import Navbar from '../Navbar';
@@ -150,9 +150,9 @@ const User = () => {
                 }
                 label="Remember me"
               />
-              <Link href="#" variant="body2" underline="hover">
-                Forgot password?
-              </Link>
+               <Link component={RouterLink} to="/forgot-password" variant="body2" underline="hover">
+                  Forgot password?
+                </Link>
             </Grid>
 
             <Button type="submit" fullWidth variant="contained" color="success" sx={{ mb: 2 }}>

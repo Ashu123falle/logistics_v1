@@ -1,6 +1,7 @@
 package com.cdac.acts.logistics_v1.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cdac.acts.logistics_v1.dto.DeliveryOrderRequestDTO;
 import com.cdac.acts.logistics_v1.dto.DeliveryOrderResponseDTO;
+import com.cdac.acts.logistics_v1.dto.InvoiceResponseDTO;
 import com.cdac.acts.logistics_v1.enums.DeliveryStatus;
 import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
 import com.cdac.acts.logistics_v1.model.Customer;
@@ -20,6 +22,7 @@ import com.cdac.acts.logistics_v1.model.Driver;
 import com.cdac.acts.logistics_v1.model.Payment;
 import com.cdac.acts.logistics_v1.model.Route;
 import com.cdac.acts.logistics_v1.model.Shipment;
+import com.cdac.acts.logistics_v1.repository.CustomerRepository;
 import com.cdac.acts.logistics_v1.repository.DeliveryOrderRepository;
 import com.cdac.acts.logistics_v1.repository.DriverRepository;
 import com.cdac.acts.logistics_v1.repository.PaymentRepository;
@@ -38,6 +41,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     private final RouteRepository routeRepository;
     private final DriverRepository driverRepository;
     private final PaymentRepository paymentRepository;
+    private final CustomerRepository customerRepository;
 
     @Autowired
     private EmailService emailService;
@@ -50,13 +54,15 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
             ShipmentRepository shipmentRepository,
             RouteRepository routeRepository,
             DriverRepository driverRepository,
-            PaymentRepository paymentRepository
+            PaymentRepository paymentRepository,
+            CustomerRepository customerRepository
     ) {
         this.deliveryOrderRepository = deliveryOrderRepository;
         this.shipmentRepository = shipmentRepository;
         this.routeRepository = routeRepository;
         this.driverRepository = driverRepository;
         this.paymentRepository = paymentRepository;
+        this.customerRepository = customerRepository;
     }
 
     private void sendOrderConfirmationEmail(DeliveryOrder order) {
@@ -234,4 +240,50 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
                 order.getNotes()
         );
     }
+    public List<InvoiceResponseDTO> getInvoicesByCustomerId(Long customerId) {
+        // Get all delivery orders for this customer
+        List<DeliveryOrder> orders = deliveryOrderRepository.findByPlacedBy_UserId(customerId);
+
+        // Fetch customer once
+        Customer customer = customerRepository.findById(customerId)
+            .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+
+        List<InvoiceResponseDTO> invoices = new ArrayList<>();
+      
+            List<Shipment>shipments = shipmentRepository.findByCustomer_UserId(customerId);
+
+            for (DeliveryOrder order : orders) {
+                // Fetch shipments related to this delivery order
+                
+                // Fetch route by route id from order
+                Route route = null;
+                if (order.getRoute() != null) {
+                    route = routeRepository.findById(order.getRoute().getId())
+                        .orElse(null);
+                }
+
+                InvoiceResponseDTO invoice = InvoiceResponseDTO.builder()
+                    .deliveryOrderId(order.getId())
+                    .cost(order.getCost())
+                    .status(order.getStatus())
+                    .scheduledPickupDate(order.getScheduledPickupDate())
+                    .scheduledDeliveryDate(order.getScheduledDeliveryDate())
+                    .notes(order.getNotes())
+                    .shipment(shipments)
+                    .route(route)
+                    .customer(customer)
+                    .build();
+
+                invoices.add(invoice);
+            }
+
+            return invoices;
+        }
+
+	
+
+	
+        
+       
+
 }

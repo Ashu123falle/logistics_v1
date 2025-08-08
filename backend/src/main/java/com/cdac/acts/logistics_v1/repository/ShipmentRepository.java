@@ -14,4 +14,6 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
     Page<Shipment> findByType(String type, Pageable pageable);
     
     List<Shipment> findByCustomer_UserId(long id);
+
+//	Shipment findByDeliveryOrderId(Long id);
 }
