@@ -1,9 +1,10 @@
 package com.cdac.acts.logistics_v1.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,14 +53,12 @@ public class AuthController {
     
     
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody String email) {
-		try {
-			userService.forgotPassword(email);
-			return ResponseEntity.ok("Password reset link sent to your email.");
-		} catch (RuntimeException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
-		}
-	}
+    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        userService.forgotPassword(email);
+        return ResponseEntity.ok("Password reset link sent to your email.");
+    }
+
 
 
     @PostMapping("/verify-otp")
