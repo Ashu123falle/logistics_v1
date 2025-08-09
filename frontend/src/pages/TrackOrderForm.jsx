@@ -18,7 +18,7 @@ import {
 import axios from "axios";
 import { styled } from "@mui/system";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import { API } from "../utilities/api";
+import API  from "../services/api";
 
 
 

@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
-import { API } from "../../../utilities/api";
+import API from "../../../services/api";
 
 const defaultPosition = [19.0760, 72.8777]; // Mumbai
 

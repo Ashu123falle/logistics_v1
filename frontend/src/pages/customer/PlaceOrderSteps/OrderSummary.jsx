@@ -23,7 +23,7 @@ const OrderSummary = ({ order, onFinish }) => {
         ["Order ID", order.id],
         ["Shipment ID", order.shipmentId],
         ["Route ID", order.routeId],
-        ["Cost", `₹ ${order.cost}`],
+        ["Cost", "\u20B9 " + order.cost],
 
         ["Status", order.status],
         ["Pickup Date", order.scheduledPickupDate],
