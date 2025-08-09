@@ -28,7 +28,8 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import BuildCircleIcon from "@mui/icons-material/BuildCircle";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { postVehicle } from "../../../utilities/vehicle";
-import { API } from "../../../utilities/api";
+import  API  from "../../../services/api"; 
+
 
 export default function TrucksManagement() {
   const [trucks, setTrucks] = useState([]);

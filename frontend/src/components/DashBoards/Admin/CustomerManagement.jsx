@@ -19,7 +19,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { API } from "../../../utilities/api"; 
+import  API  from "../../../services/api"; 
 
 export default function CustomerManagement() {
   const [customers, setCustomers] = useState([]);

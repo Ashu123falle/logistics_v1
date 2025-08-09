@@ -18,7 +18,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { API } from "../../utilities/api";
+import API from "../../services/api";
 
 const menuItems = [
   { text: "Dashboard", icon: <DashboardIcon />, path: "/driver/dashboard" },

@@ -1,4 +1,3 @@
-// src/pages/customer/Dashboard.jsx
 import React, { useState, useEffect } from "react";
 import { Box, Grid, Typography, IconButton, Badge, useMediaQuery, Paper } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -10,7 +9,7 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recha
 import API from "../../services/api";  // Adjust path if needed
 import StatCard from "../../components/StatCard";
 import NotificationsPanel from "../customer/NotificationPanel";
-import { AuthProvider, useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Dashboard() {
   const [username, setUsername] = useState({});

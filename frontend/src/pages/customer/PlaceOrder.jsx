@@ -7,19 +7,17 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import { jwtDecode } from "jwt-decode";
 import ShipmentStep from "./PlaceOrderSteps/ShipmentStep";
 import RouteStep from "./PlaceOrderSteps/RouteStep";
 import DeliveryStep from "./PlaceOrderSteps/DeliveryStep";
 import OrderSummary from "./PlaceOrderSteps/OrderSummary";
+import { useAuth } from "../../context/AuthContext"
 
-const token = localStorage.getItem("token");
-const decoded = token ? jwtDecode(token) : null;
-const currentUser = decoded || {};
 
 const steps = ["Shipment Details", "Route Selection", "Delivery Details", "Order Summary"];
 
 const PlaceOrder = () => {
+  const { auth } =useAuth();
   const [activeStep, setActiveStep] = useState(0);
   const [shipmentData, setShipmentData] = useState({});
   const [routeData, setRouteData] = useState({});
@@ -81,7 +79,7 @@ const PlaceOrder = () => {
             shipmentData={shipmentData}
 
             routeId={routeId}
-            customerId={currentUser.customerId}
+            customerId={auth.userId}
             routeData={routeData}
             onPaymentSuccess={(order) => {
               setFinalOrder(order);
