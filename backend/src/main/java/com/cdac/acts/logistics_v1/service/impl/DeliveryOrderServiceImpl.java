@@ -122,7 +122,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
                 .route(route)
                 .placedBy(shipment.getCustomer()) 
                 .cost(request.getCost())
-                .status(request.getStatus())
+                .status(DeliveryStatus.valueOf(request.getStatus().toUpperCase()))
                 .scheduledPickupDate(request.getScheduledPickupDate())
                 .scheduledDeliveryDate(request.getScheduledDeliveredDate())
                 .notes(request.getNotes())
