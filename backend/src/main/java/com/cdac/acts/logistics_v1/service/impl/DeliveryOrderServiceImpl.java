@@ -65,26 +65,42 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         this.customerRepository = customerRepository;
     }
 
-    private void sendOrderConfirmationEmail(DeliveryOrder order) {
-        Customer customer = order.getShipment().getCustomer();
-        String to = customer.getCompanyEmail();
-        String subject = "Order Confirmation - Order ID: " + order.getId();
+ private void sendOrderConfirmationEmail(DeliveryOrder order) {
+    Customer customer = order.getShipment().getCustomer();
+    String to = customer.getCompanyEmail();
+    String subject = "Your MoveBiz Order Confirmation - Order #" + order.getId() + "\n\n";
 
-        String text = "Dear " + customer.getContactPersonName() + ",\n\n"
-            + "Your order has been successfully placed. Please find the details below:\n\n"
-            + "Order ID       : " + order.getId() + "\n"
-            + "Status         : " + order.getStatus().name() + "\n"
-            + "Pickup Date    : " + order.getScheduledPickupDate() + "\n"
-//            + "Driver Name    : " + order.getAssignedDriver().getFirstName() + " " + order.getAssignedDriver().getLastName() + "\n"
-//            + "Contact Number : " + order.getAssignedDriver().getPhoneNumber() + "\n"
-//            + "Vehicle Number : " + order.getAssignedDriver().getCurrentVehicle().getRegistrationNumber() + "\n"
-            + "Cost           : ₹" + order.getCost() + "\n\n"
-            + "Thank you for choosing MoveBiz.\n\n"
-            + "Best regards,\n"
-            + "Team MoveBiz";
-
-        emailService.sendSimpleEmail(to, subject, text);
+    String driverDetails;
+    if (order.getAssignedDriver() != null) {
+        driverDetails =
+            "Driver Name    : " + order.getAssignedDriver().getFirstName() + " " + order.getAssignedDriver().getLastName() + "\n" +
+            "Contact Number : " + order.getAssignedDriver().getPhoneNumber() + "\n" +
+            "Vehicle Number : " + order.getAssignedDriver().getCurrentVehicle().getRegistrationNumber() + "\n";
+    } else {
+        driverDetails = "Driver Details : A driver will be assigned to your order shortly, and you will receive their details once confirmed.\n";
     }
+
+    String text =
+        "Dear " + customer.getContactPersonName() + ",\n\n" +
+        "We’re happy to let you know that your order has been successfully placed with MoveBiz.\n" +
+        "Here are the details of your order:\n\n" +
+        "------------------------------------------------------------\n" +
+        "Order ID       : " + order.getId() + "\n" +
+        "Status         : " + order.getStatus().name() + "\n" +
+        "Pickup Date    : " + order.getScheduledPickupDate() + "\n" +
+        driverDetails +
+        "Cost           : ₹" + order.getCost() + "\n" +
+        "------------------------------------------------------------\n\n" +
+        "You can track the status of your order anytime by logging into your MoveBiz account.\n\n" +
+        "Thank you for choosing MoveBiz for your logistics needs.\n" +
+        "We look forward to serving you again!\n\n" +
+        "Best regards,\n" +
+        "Team MoveBiz\n" +
+        "support@movebiz.com | +91-XXXXXXXXXX";
+
+    emailService.sendSimpleEmail(to, subject, text);
+}
+
 
     @Override
     public DeliveryOrderResponseDTO createOrder(DeliveryOrderRequestDTO request) {
@@ -106,7 +122,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
                 .route(route)
                 .placedBy(shipment.getCustomer()) 
                 .cost(request.getCost())
-                .status(DeliveryStatus.CONFIRMED)
+                .status(DeliveryStatus.valueOf(request.getStatus().toUpperCase()))
                 .scheduledPickupDate(request.getScheduledPickupDate())
                 .scheduledDeliveryDate(request.getScheduledDeliveredDate())
                 .notes(request.getNotes())

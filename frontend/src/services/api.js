@@ -5,6 +5,7 @@ const API = axios.create({
   baseURL: "http://localhost:8080/api", 
 });
 
+
 // Add JWT token to all outgoing requests (if token exists)
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token") || sessionStorage.getItem("token");
@@ -15,5 +16,6 @@ API.interceptors.request.use((config) => {
 }, (error) => {
   return Promise.reject(error);
 });
+
 
 export default API;

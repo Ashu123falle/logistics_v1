@@ -16,8 +16,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import AddIcon from "@mui/icons-material/Add";
-import axios from "axios";
-import  API  from "../../../services/api";
+
+import API from "../../../services/api";
+
 
 const JobManagement = () => {
 //   const API = axios.create({
@@ -42,29 +43,45 @@ API.interceptors.request.use(
     console.log("fetching..");
     
     try {
+
       const response = await API.get("/delivery-orders/all");
       console.log(response);
       
-      setJobs(response.data);
+      //setJobs(response.data);
+
+      // Step 2: Fetch route details for each order
+      const jobsWithRoutes = await Promise.all(
+        ordersRes.data.map(async (order) => {
+          if (order.routeId) {
+            try {
+              const routeRes = await API.get(`/routes/${order.routeId}`);
+              return { ...order, route: routeRes.data };
+            } catch (err) {
+              console.error(`Error fetching route ${order.routeId}:`, err);
+              return { ...order, route: null };
+            }
+          }
+          return { ...order, route: null };
+        })
+      );
+
+      setJobs(jobsWithRoutes);
+
     } catch (error) {
       console.error("Error fetching jobs:", error);
     }
   };
 
-  // useEffect(() => {
-  //   fetchJobs(); 
-  //   const interval = setInterval(fetchJobs, 10000);
-  //   return () => clearInterval(interval);
-  // }, [jobs]);
 
-  const handleViewDetails = (job) => {
-    console.log("Viewing job:", job);
-  };
+  useEffect(() => {
+    fetchJobs();
+  const interval = setInterval(fetchJobs, 900000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const handleEdit = (job) => {
-    console.log("Editing job:", job);
-  };
 
+  const handleViewDetails = (job) => console.log("Viewing job:", job);
+  const handleEdit = (job) => console.log("Editing job:", job);
   const handleDelete = async (jobId) => {
     try {
       await API.delete(`/delivery-orders/${jobId}`);
@@ -73,10 +90,7 @@ API.interceptors.request.use(
       console.error("Error deleting job:", error);
     }
   };
-
-  const handleAssignDriver = (job) => {
-    alert(`Assign driver to Job ID: ${job.id}`);
-  };
+  const handleAssignDriver = (job) => alert(`Assign driver to Job ID: ${job.id}`);
 
   const columns = [
     { field: "id", headerName: "Job ID", width: 100 },
@@ -84,33 +98,29 @@ API.interceptors.request.use(
       field: "pickupLocation",
       headerName: "Pickup Location",
       flex: 1,
-      valueGetter: (params) => params.row.route?.pickupLocation || "N/A",
+      valueGetter: (params) => params.row.route?.sourceAddress || "N/A",
     },
     {
       field: "deliveryLocation",
       headerName: "Delivery Location",
       flex: 1,
-      valueGetter: (params) => params.row.route?.deliveryLocation || "N/A",
+      valueGetter: (params) => params.row.route?.destinationAddress || "N/A",
     },
     {
       field: "scheduledPickupDate",
       headerName: "Pickup Date",
       flex: 1,
       valueGetter: (params) =>
-        new Date(params.row.scheduledPickupDate).toLocaleDateString(),
+        params.value ? new Date(params.value).toLocaleDateString() : "N/A",
     },
     {
-      field: "scheduledDeliveredDate",
+      field: "scheduledDeliveryDate",
       headerName: "Delivery Date",
       flex: 1,
       valueGetter: (params) =>
-        new Date(params.row.scheduledDeliveredDate).toLocaleDateString(),
+        params.value ? new Date(params.value).toLocaleDateString() : "N/A",
     },
-    {
-      field: "status",
-      headerName: "Status",
-      flex: 1,
-    },
+    { field: "status", headerName: "Status", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
@@ -136,11 +146,10 @@ API.interceptors.request.use(
   ];
 
   const CustomToolbar = () => (
-    <GridToolbarContainer>
+    <GridToolbarContainer sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
       <Button
         startIcon={<AddIcon />}
         variant="contained"
-        sx={{ mb: 1 }}
         onClick={() => alert("Add new job")}
       >
         Add Job
@@ -154,6 +163,10 @@ API.interceptors.request.use(
       <Typography variant="h4" gutterBottom>
         Job Management
       </Typography>
+      <Button variant="outlined" onClick={fetchJobs}>
+  Refresh Now
+</Button>
+
       <Paper elevation={3} sx={{ p: 2 }}>
         <div style={{ height: 500, width: "100%" }}>
           <DataGrid

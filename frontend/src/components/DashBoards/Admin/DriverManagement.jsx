@@ -29,28 +29,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import DriveEtaIcon from "@mui/icons-material/DriveEta";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
-import axios from "axios";
 
-const API = axios.create({
-  baseURL: "http://localhost:8080/api",
-});
+import  API  from "../../../services/api"; 
 
-API.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    
-    return config;
-  },
-  (error) => {
-    
-    return Promise.reject(error);
-  }
-);
 
 export default function DriverManagement() {
   const [drivers, setDrivers] = useState([]);

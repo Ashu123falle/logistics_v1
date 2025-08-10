@@ -184,6 +184,7 @@ public class UserServiceImpl implements UserService {
 	public String forgotPassword(String email) {
 		User user = userRepository.findByEmail(email)
 				.orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+		System.out.println(user);
 		String userEmail = user.getEmail();
 		if (userEmail != null && !userEmail.isEmpty()) {
 			otpService.generateAndSendOtp(userEmail);

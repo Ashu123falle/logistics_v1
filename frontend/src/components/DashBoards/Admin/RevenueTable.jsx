@@ -18,25 +18,8 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import axios from "axios";
+import  API  from "../../../services/api"; 
 
-
-const API = axios.create({
-  baseURL: "http://localhost:8080/api",
-});
-
-API.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 export default function RevenueTable() {
   const [payments, setPayments] = useState([]);

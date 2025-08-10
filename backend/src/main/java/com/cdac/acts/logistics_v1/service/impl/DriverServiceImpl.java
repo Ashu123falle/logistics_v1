@@ -73,7 +73,7 @@ public class DriverServiceImpl implements DriverService {
 	public DriverResponseDTO createDriver(DriverRequestDTO request) {
 		Driver newDriver = mapToEntity(request);
 		newDriver.setCreatedAt(LocalDateTime.now());
-		
+		newDriver.setPassword(passwordEncoder.encode(newDriver.getPassword()));
 		return mapToResponseDTO(driverRepository.save(newDriver));
 		
 	}

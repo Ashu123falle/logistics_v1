@@ -27,10 +27,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import PersonIcon from "@mui/icons-material/Person";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import axios from "axios";
-
-
-
+import  API  from "../../../services/api"; 
 
 const statusColors = {
   SUCCESS: "success",

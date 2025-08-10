@@ -9,7 +9,7 @@ import {
   Alert,
   Paper,
 } from "@mui/material";
-import { API } from "../../../utilities/api";
+import API from "../../../services/api";
 import { useAuth } from "../../../context/AuthContext";
 
 const ShipmentStep = ({ data, setData, onContinue }) => {

@@ -8,9 +8,8 @@
   flex-wrap: wrap;
 }
 
-/* Left - Form Side */
+/* Left - Form Side (75%) */
 .signup-form-side {
-  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,21 +18,20 @@
   min-width: 320px;
   box-sizing: border-box;
   z-index: 1;
-  /* Allow form side to grow with content */
   height: auto;
+  flex: 0 0 75%; /* Fixed width 75% */
 }
 
-/* Right - Image Side */
+/* Right - Image Side (25%) */
 .signup-image-side {
-  flex: 1;
+  flex: 0 0 25%; /* Fixed width 25% */
   background-image: url('https://logistics-v1.vercel.app/images/20945966.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
-  height: 100%; /* Make the image container take full height of the screen */
-  width: 100%;
-  min-width: 320px;
+  height: 100%;
+  min-width: 200px;
 }
 
 /* Dark Overlay on Image */
@@ -51,15 +49,15 @@
 /* Responsive Design - Tablet */
 @media (max-width: 900px) {
   .signup-container {
-    flex-direction: column; /* Stack form and image side on smaller screens */
+    flex-direction: column;
   }
-
   .signup-image-side {
-    height: 250px; /* Reduced height on tablet */
+    height: 250px;
     min-height: 250px;
+    flex: 1 1 100%;
   }
-
   .signup-form-side {
+    flex: 1 1 100%;
     padding: 2rem;
   }
 }
@@ -69,13 +67,8 @@
   .signup-form-side {
     padding: 1rem;
   }
-
-  .signup-form-side form {
-    width: 100%;
-  }
-
   .signup-image-side {
-    height: 200px; /* Further reduce height on small screens */
+    height: 200px;
     min-height: 200px;
   }
 }
