@@ -32,7 +32,7 @@ export default function Payment() {
     setLoading(true);
     setApiError(null);
     try {
-      const response = await API.get("/api/payment");
+      const response = await API.get("/payment");
       
       setPayments(response.data);
     } catch (error) {
