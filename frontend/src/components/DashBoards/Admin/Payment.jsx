@@ -34,10 +34,9 @@ export default function Payment() {
     setApiError(null);
     try {
 
-      const response = await API.get("/payment");
-      // Adjust this line if your API response structure differs:
-      // For example, if response.data.payments exists, use that
 
+      const response = await API.get("/payment");
+  
       setPayments(response.data);
     } catch (error) {
       console.error("Error fetching payments:", error);
