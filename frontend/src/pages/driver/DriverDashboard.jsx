@@ -147,8 +147,10 @@ const handleStatusChange = async (id, newStatus) => {
           deliveries.map((order, index) => (
             <Paper key={index} variant="outlined" sx={{ p: 2, mb: 1 }}>
               <Typography><LocalShippingIcon /> Order #{order.id}</Typography>
-              <Typography>Pickup: {order.scheduledPickupDate.slice(0, 10)}</Typography>
-              <Typography>Drop: {order.scheduledDeliveryDate.slice(0, 10)}</Typography>
+              <Typography>Pickup: {order.scheduledPickupDate}</Typography>
+              {/* <Typography>Drop: {order.scheduledDeliveryDate.slice(0, 10)}</Typography> */}
+              <Typography>Drop: {order.scheduledDeliveryDate}</Typography>
+
               <Typography>Status: <strong>{order.status}</strong></Typography>
               <Button
                 variant="contained"

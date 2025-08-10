@@ -17,26 +17,45 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
-import { API } from "../../../utilities/api";
+import  API  from "../../../services/api";
 
 const JobManagement = () => {
+//   const API = axios.create({
+//   baseURL: "http://localhost:8080/api",
+// });
+
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
   const [jobs, setJobs] = useState([]);
 
   const fetchJobs = async () => {
+    console.log("fetching..");
+    
     try {
-      const response = await API.get("/delivery-orders");
+      const response = await API.get("/delivery-orders/all");
+      console.log(response);
+      
       setJobs(response.data);
     } catch (error) {
       console.error("Error fetching jobs:", error);
     }
   };
 
-  useEffect(() => {
-    fetchJobs(); 
-    const interval = setInterval(fetchJobs, 1000); 
-
-    return () => clearInterval(interval);
-  }, []);
+  // useEffect(() => {
+  //   fetchJobs(); 
+  //   const interval = setInterval(fetchJobs, 10000);
+  //   return () => clearInterval(interval);
+  // }, [jobs]);
 
   const handleViewDetails = (job) => {
     console.log("Viewing job:", job);

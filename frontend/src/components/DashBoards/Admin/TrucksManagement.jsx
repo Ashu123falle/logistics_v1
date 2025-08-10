@@ -44,7 +44,6 @@ export default function TrucksManagement() {
     driverId: "",
   });
 
-
   useEffect(() => {
     const storedTrucks = localStorage.getItem("trucksData");
     if (storedTrucks) {
@@ -63,7 +62,7 @@ export default function TrucksManagement() {
       const response = await API.get("/vehicles");
       const backendTrucks = response.data.map((t) => ({
         ...t,
-        status: t.status || "Active", 
+        status: t.status || "Active",
       }));
       setTrucks(backendTrucks);
     } catch (error) {
@@ -82,21 +81,16 @@ export default function TrucksManagement() {
     }
 
     if (editMode && selectedTruckId) {
-      
       setTrucks((prev) =>
-        prev.map((t) =>
-          t.id === selectedTruckId ? { ...t, ...newTruck } : t
-        )
+        prev.map((t) => (t.id === selectedTruckId ? { ...t, ...newTruck } : t))
       );
 
-    
       try {
         await API.put(`/vehicles/${selectedTruckId}`, newTruck);
       } catch {
         console.warn("Backend update failed. Data saved locally only.");
       }
     } else {
-      
       const tempTruck = {
         ...newTruck,
         id: Date.now(),
@@ -106,9 +100,7 @@ export default function TrucksManagement() {
       try {
         const savedTruck = await postVehicle(newTruck);
         setTrucks((prev) =>
-          prev.map((t) =>
-            t.id === tempTruck.id ? { ...savedTruck } : t
-          )
+          prev.map((t) => (t.id === tempTruck.id ? { ...savedTruck } : t))
         );
       } catch {
         console.warn("Backend save failed. Truck stored locally only.");
@@ -138,9 +130,7 @@ export default function TrucksManagement() {
 
   const handleStatusChange = (truckId, newStatus) => {
     setTrucks((prev) =>
-      prev.map((t) =>
-        t.id === truckId ? { ...t, status: newStatus } : t
-      )
+      prev.map((t) => (t.id === truckId ? { ...t, status: newStatus } : t))
     );
   };
 
@@ -281,9 +271,8 @@ export default function TrucksManagement() {
               <FormControl size="small" fullWidth>
                 <Select
                   value={truck.status}
-                  onChange={(e) =>
-                    handleStatusChange(truck.id, e.target.value)
-                  }
+                  onChange={(e) => handleStatusChange(truck.id, e.target.value)}
+                  labelId={`status-label-${truck.id}`}
                 >
                   <MenuItem value="Active">Active</MenuItem>
                   <MenuItem value="Under Maintenance">Under Maintenance</MenuItem>
@@ -344,9 +333,10 @@ export default function TrucksManagement() {
 
           {/* Status Dropdown */}
           <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
+            <InputLabel id="status-label">Status</InputLabel>
             <Select
               value={newTruck.status}
+              labelId="status-label"
               label="Status"
               onChange={(e) => setNewTruck({ ...newTruck, status: e.target.value })}
             >

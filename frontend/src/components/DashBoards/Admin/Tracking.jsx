@@ -9,7 +9,7 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import { API } from "../../../utilities/api";
+import  API  from "../../../services/api";
 
 
 export default function Tracking({ initialOrderId = "" }) {
@@ -31,7 +31,7 @@ export default function Tracking({ initialOrderId = "" }) {
     try {
       setLoading(true);
       setError("");
-      const response = await API.get(`/customer/track/${id}`);
+      const response = await API.get(`/delivery-orders/${id}`);
       setShipment(response.data);
     } catch (err) {
       console.error("Error fetching shipment:", err);

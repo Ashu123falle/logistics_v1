@@ -16,6 +16,7 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API from "../../../services/api";
 
 const statusColors = {
   SUCCESS: "success",
@@ -32,7 +33,7 @@ export default function Payment() {
     setLoading(true);
     setApiError(null);
     try {
-      const response = await axios.get("/api/payment");
+      const response = await API.get("/payment");
       // Adjust this line if your API response structure differs:
       // For example, if response.data.payments exists, use that
       setPayments(response.data);
