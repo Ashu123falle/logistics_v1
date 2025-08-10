@@ -73,7 +73,7 @@ public class DeliveryOrderController {
 
     
     @PreAuthorize("hasRole('ADMIN') or hasRole('DRIVER') or hasRole('CUSTOMER')")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<DeliveryOrderResponseDTO>> getAllOrders(
             @RequestParam(defaultValue = "1") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize) {
