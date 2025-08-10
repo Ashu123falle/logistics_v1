@@ -285,6 +285,7 @@ export default function Home() {
                 >
                   Ship Now
                 </Button>
+                
                 <Menu
                   anchorEl={anchorEls["Ship Now"]}
                   open={Boolean(anchorEls["Ship Now"])}
@@ -329,7 +330,29 @@ export default function Home() {
                     </MenuItem>
                   ))}
                 </Menu>
+                
               </Box>
+
+              <Button
+  variant="outlined"
+  onClick={handleLoginClick}
+  sx={{
+    ml: 2,
+    color: "#fff",
+    borderColor: "#fff",
+    textTransform: "none",
+    fontWeight: "bold",
+    borderRadius: "6px",
+    px: 2,
+    "&:hover": {
+      backgroundColor: "rgba(255,255,255,0.1)",
+      borderColor: "#ff0000",
+      color: "#ff0000",
+    },
+  }}
+>
+  Login
+</Button>
             </Box>
           )}
 
@@ -438,8 +461,29 @@ export default function Home() {
                   ))}
                 </List>
               </Collapse>
+                <Button
+                      variant="outlined"
+                      onClick={handleLoginClick}
+                      sx={{
+                        ml: 2,
+                        color: "#fff",
+                        borderColor: "#fff",
+                        textTransform: "none",
+                        fontWeight: "bold",
+                        borderRadius: "6px",
+                        px: 2,
+                        "&:hover": {
+                          backgroundColor: "rgba(255,255,255,0.1)",
+                          borderColor: "#ff0000",
+                          color: "#ff0000",
+                        },
+                      }}
+                    >
+                      Login
+                </Button>
             </List>
           </Box>
+          
         </Drawer>
       </AppBar>
 
