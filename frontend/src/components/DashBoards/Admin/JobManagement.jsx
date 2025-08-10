@@ -86,24 +86,24 @@ const JobManagement = () => {
   const columns = [
     { field: "id", headerName: "Job ID", width: 100 },
     {
-      field: "pickupLocation",
+      field: "sourceAddress",
       headerName: "Pickup Location",
       flex: 1,
-      valueGetter: (params) => params.row.route?.sourceAddress || "N/A",
+      valueGetter: (params) => params?.row?.route?.sourceAddress || "N/A",
     },
     {
-      field: "deliveryLocation",
+      field: "destinationAddress",
       headerName: "Delivery Location",
       flex: 1,
-      valueGetter: (params) => params.row.route?.destinationAddress || "N/A",
+      valueGetter: (params) => params?.row?.route?.destinationAddress || "N/A",
     },
     {
       field: "scheduledPickupDate",
       headerName: "Pickup Date",
       flex: 1,
       valueGetter: (params) =>
-        params.row.scheduledPickupDate
-          ? new Date(params.row.scheduledPickupDate).toLocaleDateString()
+        params?.row?.scheduledPickupDate
+          ? new Date(params?.row?.scheduledPickupDate).toLocaleDateString()
           : "N/A",
     },
     {
@@ -111,8 +111,8 @@ const JobManagement = () => {
       headerName: "Delivery Date",
       flex: 1,
       valueGetter: (params) =>
-        params.row.scheduledDeliveryDate
-          ? new Date(params.row.scheduledDeliveryDate).toLocaleDateString()
+        params?.row?.scheduledDeliveryDate
+          ? new Date(params?.row?.scheduledDeliveryDate).toLocaleDateString()
           : "N/A",
     },
     { field: "status", headerName: "Status", flex: 1 },
