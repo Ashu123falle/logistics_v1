@@ -22,13 +22,12 @@ import API from "../../../services/api";
 const JobManagement = () => {
   const [jobs, setJobs] = useState([]);
   const [pageNo, setPageNo] = useState(1);
-  const pageSize = 7; // you set pageSize=7 in DataGrid
+  const pageSize = 7;
   const [loading, setLoading] = useState(false);
 
   const fetchJobs = async (page = pageNo) => {
     setLoading(true);
     try {
-      // Fetch paged delivery orders
       const ordersRes = await API.get("/delivery-orders/all", {
         params: {
           pageNo: page,
@@ -36,10 +35,8 @@ const JobManagement = () => {
         },
       });
 
-      // Assuming backend returns an array of orders in response.data
-      // Fetch route details for each order
       const jobsWithRoutes = await Promise.all(
-        ordersRes.data.map(async (order) => {
+        (ordersRes.data || []).map(async (order) => {
           if (order.routeId) {
             try {
               const routeRes = await API.get(`/routes/${order.routeId}`);
@@ -54,7 +51,7 @@ const JobManagement = () => {
       );
 
       setJobs(jobsWithRoutes);
-      setPageNo(page); // update current page state in case of manual calls
+      setPageNo(page);
     } catch (error) {
       console.error("Error fetching jobs:", error);
     } finally {
@@ -64,9 +61,12 @@ const JobManagement = () => {
 
   useEffect(() => {
     fetchJobs(pageNo);
-    const interval = setInterval(() => fetchJobs(pageNo), 900000); // refresh every 15 minutes
-    return () => clearInterval(interval);
   }, [pageNo]);
+
+  useEffect(() => {
+    const interval = setInterval(() => fetchJobs(pageNo), 900000); // refresh every 15 mins
+    return () => clearInterval(interval);
+  }, []);
 
   const handleViewDetails = (job) => console.log("Viewing job:", job);
   const handleEdit = (job) => console.log("Editing job:", job);
@@ -80,7 +80,6 @@ const JobManagement = () => {
   };
   const handleAssignDriver = (job) => alert(`Assign driver to Job ID: ${job.id}`);
 
-  // Pagination handlers
   const handleNext = () => setPageNo((prev) => prev + 1);
   const handlePrevious = () => setPageNo((prev) => (prev > 1 ? prev - 1 : 1));
 
@@ -90,27 +89,27 @@ const JobManagement = () => {
       field: "pickupLocation",
       headerName: "Pickup Location",
       flex: 1,
-      valueGetter: (params) => params.row.route?.sourceAddress || "N/A",
+      valueGetter: (params) => params?.row?.route?.sourceAddress || "N/A",
     },
     {
       field: "deliveryLocation",
       headerName: "Delivery Location",
       flex: 1,
-      valueGetter: (params) => params.row.route?.destinationAddress || "N/A",
+      valueGetter: (params) => params?.row?.route?.destinationAddress || "N/A",
     },
     {
       field: "scheduledPickupDate",
       headerName: "Pickup Date",
       flex: 1,
       valueGetter: (params) =>
-        params.value ? new Date(params.value).toLocaleDateString() : "N/A",
+        params?.value ? new Date(params.value).toLocaleDateString() : "N/A",
     },
     {
       field: "scheduledDeliveryDate",
       headerName: "Delivery Date",
       flex: 1,
       valueGetter: (params) =>
-        params.value ? new Date(params.value).toLocaleDateString() : "N/A",
+        params?.value ? new Date(params.value).toLocaleDateString() : "N/A",
     },
     { field: "status", headerName: "Status", flex: 1 },
     {
@@ -139,11 +138,7 @@ const JobManagement = () => {
 
   const CustomToolbar = () => (
     <GridToolbarContainer sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-      <Button
-        startIcon={<AddIcon />}
-        variant="contained"
-        onClick={() => alert("Add new job")}
-      >
+      <Button startIcon={<AddIcon />} variant="contained" onClick={() => alert("Add new job")}>
         Add Job
       </Button>
       <GridToolbarExport />
@@ -179,7 +174,7 @@ const JobManagement = () => {
             loading={loading}
             components={{ Toolbar: CustomToolbar }}
             getRowId={(row) => row.id}
-            pagination={false} // pagination handled manually
+            pagination={false} // manual pagination
           />
         </div>
       </Paper>
