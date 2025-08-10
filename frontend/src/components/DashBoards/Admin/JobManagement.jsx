@@ -19,22 +19,25 @@ import AddIcon from "@mui/icons-material/Add";
 
 import API from "../../../services/api";
 
-
 const JobManagement = () => {
-
   const [jobs, setJobs] = useState([]);
+  const [pageNo, setPageNo] = useState(1);
+  const pageSize = 7; // you set pageSize=7 in DataGrid
+  const [loading, setLoading] = useState(false);
 
-  const fetchJobs = async () => {
-    console.log("fetching..");
-    
+  const fetchJobs = async (page = pageNo) => {
+    setLoading(true);
     try {
+      // Fetch paged delivery orders
+      const ordersRes = await API.get("/delivery-orders/all", {
+        params: {
+          pageNo: page,
+          pageSize,
+        },
+      });
 
-      const response = await API.get("/delivery-orders/all");
-      console.log(response);
-      
-      //setJobs(response.data);
-
-      // Step 2: Fetch route details for each order
+      // Assuming backend returns an array of orders in response.data
+      // Fetch route details for each order
       const jobsWithRoutes = await Promise.all(
         ordersRes.data.map(async (order) => {
           if (order.routeId) {
@@ -51,31 +54,35 @@ const JobManagement = () => {
       );
 
       setJobs(jobsWithRoutes);
-
+      setPageNo(page); // update current page state in case of manual calls
     } catch (error) {
       console.error("Error fetching jobs:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-
   useEffect(() => {
-    fetchJobs();
-  const interval = setInterval(fetchJobs, 900000);
+    fetchJobs(pageNo);
+    const interval = setInterval(() => fetchJobs(pageNo), 900000); // refresh every 15 minutes
     return () => clearInterval(interval);
-  }, []);
-
+  }, [pageNo]);
 
   const handleViewDetails = (job) => console.log("Viewing job:", job);
   const handleEdit = (job) => console.log("Editing job:", job);
   const handleDelete = async (jobId) => {
     try {
       await API.delete(`/delivery-orders/${jobId}`);
-      fetchJobs();
+      fetchJobs(pageNo);
     } catch (error) {
       console.error("Error deleting job:", error);
     }
   };
   const handleAssignDriver = (job) => alert(`Assign driver to Job ID: ${job.id}`);
+
+  // Pagination handlers
+  const handleNext = () => setPageNo((prev) => prev + 1);
+  const handlePrevious = () => setPageNo((prev) => (prev > 1 ? prev - 1 : 1));
 
   const columns = [
     { field: "id", headerName: "Job ID", width: 100 },
@@ -148,19 +155,31 @@ const JobManagement = () => {
       <Typography variant="h4" gutterBottom>
         Job Management
       </Typography>
-      <Button variant="outlined" onClick={fetchJobs}>
-  Refresh Now
-</Button>
+
+      <Box mb={2} display="flex" alignItems="center" gap={1}>
+        <Button variant="outlined" onClick={() => fetchJobs(pageNo)} disabled={loading}>
+          Refresh Now
+        </Button>
+        <Button variant="contained" onClick={handlePrevious} disabled={pageNo === 1 || loading}>
+          Previous
+        </Button>
+        <Typography>Page: {pageNo}</Typography>
+        <Button variant="contained" onClick={handleNext} disabled={loading}>
+          Next
+        </Button>
+      </Box>
 
       <Paper elevation={3} sx={{ p: 2 }}>
         <div style={{ height: 500, width: "100%" }}>
           <DataGrid
             rows={jobs}
             columns={columns}
-            pageSize={7}
-            rowsPerPageOptions={[7]}
+            pageSize={pageSize}
+            rowsPerPageOptions={[pageSize]}
+            loading={loading}
             components={{ Toolbar: CustomToolbar }}
             getRowId={(row) => row.id}
+            pagination={false} // pagination handled manually
           />
         </div>
       </Paper>
