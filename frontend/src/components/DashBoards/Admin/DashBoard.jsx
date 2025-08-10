@@ -16,6 +16,7 @@ import axios from "axios";
 import RevenueChart from "./RevenueChart";
 import AssignmentIcon from "@mui/icons-material/Assignment"; 
 import RevenueTable from "./RevenueTable";
+import API from "../../../services/api";
 
 
 function RevenueCard({ title, amount, growth, description, icon, error }) {
@@ -68,22 +69,7 @@ function NotificationsPanel({ notificationsOpen, onClose }) {
 }
 
 
-const API = axios.create({
-  baseURL: "http://localhost:8080/api",
-});
 
-API.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 
 function DashBoard() {
@@ -150,7 +136,7 @@ function DashBoard() {
     const fetchJobData = async () => {
       setTotalJobs((prevState) => ({ ...prevState, loading: true, error: null }));
       try {
-        const response = await API.get("/delivery-orders");
+        const response = await API.get("/delivery-orders/all");
         const jobs = response.data;
 
         const currentCount = jobs.length;

@@ -9,11 +9,14 @@ import ForgotPassword from "../components/logins/ForgetPassword";
 import AboutUs from "../pages/AboutUs";
 import { Support } from "@mui/icons-material";
 import SupportPage from "../pages/SupportPage";
+import ForgetPassword from "../components/logins/ForgetPassword";
 import VerifyOtp from "../components/VerifyOtp";
+
 const PublicRoutes = (
   <>
     <Route path="/" element={<Home />} />
     <Route path="/login" element={<User />} />
+    <Route path="/forgot-password" element={<ForgetPassword/>} />
     <Route path="/signup" element={<Signup />} />
     <Route path="/forgot-password" element={<ForgotPassword />} /> 
     <Route path="/verify-otp" element={<VerifyOtp />} /> 

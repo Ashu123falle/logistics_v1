@@ -32,7 +32,7 @@ export default function Dashboard() {
         console.log(res.data);
         
         setTotalInvoices({ amount: res.data.totalOrders, loading: false, error: null });
-        setTotalDeliveries({ amount: res.data.totalOrders-1, loading: false, error: null });
+        setTotalDeliveries({ amount: res.data.totalOrders, loading: false, error: null });
         const totalAmount = res.data.totalSpent;
         setTotalPayments({ amount: totalAmount, loading: false, error: null });
       } catch (err) {

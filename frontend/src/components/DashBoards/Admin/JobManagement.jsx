@@ -16,15 +16,38 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import AddIcon from "@mui/icons-material/Add";
+
 import API from "../../../services/api";
 
+
 const JobManagement = () => {
+//   const API = axios.create({
+//   baseURL: "http://localhost:8080/api",
+// });
+
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
   const [jobs, setJobs] = useState([]);
 
   const fetchJobs = async () => {
+    console.log("fetching..");
+    
     try {
-      // Step 1: Get all delivery orders
-      const ordersRes = await API.get("/delivery-orders");
+
+      const response = await API.get("/delivery-orders/all");
+      console.log(response);
+      
+      //setJobs(response.data);
 
       // Step 2: Fetch route details for each order
       const jobsWithRoutes = await Promise.all(
@@ -43,16 +66,19 @@ const JobManagement = () => {
       );
 
       setJobs(jobsWithRoutes);
+
     } catch (error) {
       console.error("Error fetching jobs:", error);
     }
   };
+
 
   useEffect(() => {
     fetchJobs();
   const interval = setInterval(fetchJobs, 900000);
     return () => clearInterval(interval);
   }, []);
+
 
   const handleViewDetails = (job) => console.log("Viewing job:", job);
   const handleEdit = (job) => console.log("Editing job:", job);

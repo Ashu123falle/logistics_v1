@@ -15,6 +15,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import { useNavigate } from "react-router-dom";
+
 import  API  from "../../../services/api"; 
 
 const statusColors = {
@@ -32,8 +33,10 @@ export default function Payment() {
     setLoading(true);
     setApiError(null);
     try {
+
+
       const response = await API.get("/payment");
-      
+  
       setPayments(response.data);
     } catch (error) {
       console.error("Error fetching payments:", error);
