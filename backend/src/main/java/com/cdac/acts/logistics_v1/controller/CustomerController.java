@@ -75,9 +75,7 @@ public class CustomerController {
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize) {
 
-
-        List<CustomerResponseDTO> customers = customerService.getAllCustomers(); 
-
+    	 List<CustomerResponseDTO> customers = customerService.getAllCustomers();
         return ResponseEntity.ok(customers);
     }
 

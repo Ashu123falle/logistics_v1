@@ -22,8 +22,6 @@ import com.cdac.acts.logistics_v1.service.UserService;
 @RequestMapping("/api/auth") 
 public class AuthController {
 
-    @Autowired
-
     private UserService userService; // Service for user authentication and registration
 
     @Autowired
