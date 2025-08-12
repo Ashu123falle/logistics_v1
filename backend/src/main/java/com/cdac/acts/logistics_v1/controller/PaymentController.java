@@ -23,55 +23,58 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/payment")
 @RequiredArgsConstructor
-
 public class PaymentController {
 
     private final PaymentService paymentService;
 
+    // Create a new payment (Customer only)
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> create(@RequestBody PaymentRequestDTO dto) {
         return ResponseEntity.ok(paymentService.createPayment(dto));
     }
 
+    // Verify a payment transaction (Customer only)
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/verify")
     public ResponseEntity<String> verify(@RequestBody Map<String, String> payload) {
         return ResponseEntity.ok(paymentService.verifyTransaction(payload));
     }
 
+    // Get payment details by ID (Admin or Customer)
     @PreAuthorize("hasRole('ADMIN') or hasRole('CUSTOMER')")
     @GetMapping("/{id}")
     public ResponseEntity<PaymentResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(paymentService.getPaymentById(id));
     }
 
+    // Get all payments (Admin only)
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<PaymentResponseDTO>> getAll() {
         return ResponseEntity.ok(paymentService.getAllPayments());
     }
 
+    // Update an existing payment (Customer only)
     @PreAuthorize("hasRole('CUSTOMER')")
     @PutMapping("/{id}")
     public ResponseEntity<PaymentResponseDTO> update(@PathVariable Long id, @RequestBody PaymentRequestDTO dto) {
         return ResponseEntity.ok(paymentService.updatePayment(id, dto));
     }
 
+    // Delete a payment by ID (Customer or Admin)
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         paymentService.deletePayment(id);
         return ResponseEntity.noContent().build();
-
     }
-    
+
+    // Get all payments for a specific customer (Customer or Admin)
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<PaymentResponseDTO>> getPaymentsByCustomer(@PathVariable Long customerId) {
         List<PaymentResponseDTO> payments = paymentService.getPaymentByCustomerId(customerId);
         return ResponseEntity.ok(payments);
-
     }
-    
 }

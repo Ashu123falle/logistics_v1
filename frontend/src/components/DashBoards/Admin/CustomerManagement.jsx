@@ -19,7 +19,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { API } from "../../../utilities/api"; // Ensure this path is correct
+import  API  from "../../../services/api"; 
 
 export default function CustomerManagement() {
   const [customers, setCustomers] = useState([]);
@@ -43,9 +43,10 @@ export default function CustomerManagement() {
 
   const fetchCustomers = async () => {
     try {
-      const response = await API.get("/customer/all");
+      const response = await API.get("/customer");
       setCustomers(response.data);
     } catch (err) {
+     
       console.error("Failed to fetch customers", err);
     }
   };
@@ -100,7 +101,7 @@ export default function CustomerManagement() {
       if (dialogMode === "edit") {
         await API.put(`/customer/update/${selectedCustomer.id}`, formValues);
       } else if (dialogMode === "add") {
-        await API.post("/customer/add", formValues);
+        await API.post("/customer", formValues);
       }
       fetchCustomers();
       setOpenDialog(false);

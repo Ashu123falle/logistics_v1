@@ -1,5 +1,4 @@
-// src/components/Navbar.jsx
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -22,9 +21,8 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-  // const { userRole, logout } = useContext(AuthContext);
   const { auth, logout } = useAuth();
-const userRole = auth.role;
+  const userRole = auth.role;
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -46,8 +44,8 @@ const userRole = auth.role;
 
   const shipNowOptions = (
     <>
-      <MenuItem onClick={handleMenuClose}>Schedule a Pickup</MenuItem>
-      <MenuItem onClick={handleMenuClose}>Create Shipment</MenuItem>
+      <MenuItem onClick={() => { handleMenuClose(); navigate("/schedule-pickup"); }}>Schedule a Pickup</MenuItem>
+      <MenuItem onClick={() => { handleMenuClose(); navigate("/create-shipment"); }}>Create Shipment</MenuItem>
     </>
   );
 
@@ -58,15 +56,23 @@ const userRole = auth.role;
       <AppBar position="static" sx={{ backgroundColor: "#0b0c0e", boxShadow: "none" }}>
         <Toolbar sx={{ justifyContent: "space-between" }}>
           {/* Logo */}
-          <Typography variant="h6" sx={{ fontWeight: 700, color: "#fff" }}>
-            P2PLogistics
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 700, color: "#fff", cursor: "pointer" }}
+            onClick={() => navigate("/")}
+          >
+            MoveBiz
           </Typography>
 
           {/* Desktop Nav */}
           {!isMobile && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
               {navItems.map((item) => (
-                <Button key={item} sx={{ color: "#fff", textTransform: "none" }}>
+                <Button
+                  key={item}
+                  sx={{ color: "#fff", textTransform: "none" }}
+                  onClick={() => navigate(`/${item.toLowerCase().replace(/ /g, "-")}`)}
+                >
                   {item}
                 </Button>
               ))}
@@ -88,10 +94,27 @@ const userRole = auth.role;
                 </Button>
               )}
 
-              {userRole && (
+              {userRole ? (
                 <Button onClick={logout} sx={{ color: "#fff" }}>
                   Logout
                 </Button>
+              ) : (
+                <>
+                  <Button onClick={() => navigate("/login")} sx={{ color: "#fff" }}>
+                    Login
+                  </Button>
+                  <Button
+                    onClick={() => navigate("/signup")}
+                    variant="outlined"
+                    sx={{
+                      borderColor: "#fff",
+                      color: "#fff",
+                      "&:hover": { backgroundColor: "rgba(255,255,255,0.1)" },
+                    }}
+                  >
+                    Sign Up
+                  </Button>
+                </>
               )}
             </Box>
           )}
@@ -115,7 +138,14 @@ const userRole = auth.role;
         <Box sx={{ width: 250, backgroundColor: "#0b0c0e", height: "100%", color: "white" }}>
           <List>
             {navItems.map((item) => (
-              <ListItem button key={item} onClick={toggleDrawer}>
+              <ListItem
+                button
+                key={item}
+                onClick={() => {
+                  navigate(`/${item.toLowerCase().replace(/ /g, "-")}`);
+                  toggleDrawer();
+                }}
+              >
                 <ListItemText primary={item} />
               </ListItem>
             ))}
@@ -126,10 +156,37 @@ const userRole = auth.role;
               </ListItem>
             )}
 
-            {userRole && (
-              <ListItem button onClick={logout}>
+            {userRole ? (
+              <ListItem
+                button
+                onClick={() => {
+                  logout();
+                  toggleDrawer();
+                }}
+              >
                 <ListItemText primary="Logout" />
               </ListItem>
+            ) : (
+              <>
+                <ListItem
+                  button
+                  onClick={() => {
+                    navigate("/login");
+                    toggleDrawer();
+                  }}
+                >
+                  <ListItemText primary="Login" />
+                </ListItem>
+                <ListItem
+                  button
+                  onClick={() => {
+                    navigate("/signup");
+                    toggleDrawer();
+                  }}
+                >
+                  <ListItemText primary="Sign Up" />
+                </ListItem>
+              </>
             )}
           </List>
         </Box>

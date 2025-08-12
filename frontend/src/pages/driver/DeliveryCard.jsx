@@ -154,24 +154,42 @@ const DeliveryCard = ({ delivery, onStatusChange }) => {
             <Chip label={statusLabel} color={statusColors[localStatus]} />
           </Box>
 
-          <FormControl fullWidth variant="outlined" size="small" sx={{ mt: 1 }}>
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={localStatus}
-              label="Status"
-              onChange={(e) => {
-                const newStatus = e.target.value;
-                setLocalStatus(newStatus);
-                onStatusChange(delivery.deliveryId, newStatus);
-              }}
-            >
-              <MenuItem value="RECEIVED">RECEIVED</MenuItem>
-              <MenuItem value="IN_TRANSIT">IN TRANSIT</MenuItem>
-              <MenuItem value="DELIVERED">DELIVERED</MenuItem>
-              <MenuItem value="FAILED">FAILED</MenuItem>
-              <MenuItem value="CANCELLED">CANCELLED</MenuItem>
-            </Select>
-          </FormControl>
+         <FormControl
+  fullWidth
+  variant="outlined"
+  size="small"
+  sx={{
+    mt: 1,
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "green", // default border
+      },
+      "&:hover fieldset": {
+        borderColor: "darkgreen", // hover border
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "green", // focus border
+      },
+    },
+  }}
+>
+  <InputLabel>Status</InputLabel>
+  <Select
+    value={localStatus}
+    label="Status"
+    onChange={(e) => {
+      const newStatus = e.target.value;
+      setLocalStatus(newStatus);
+      onStatusChange(delivery.deliveryId, newStatus);
+    }}
+  >
+    <MenuItem value="RECEIVED">RECEIVED</MenuItem>
+    <MenuItem value="IN_TRANSIT">IN TRANSIT</MenuItem>
+    <MenuItem value="DELIVERED">DELIVERED</MenuItem>
+    <MenuItem value="FAILED">FAILED</MenuItem>
+    <MenuItem value="CANCELLED">CANCELLED</MenuItem>
+  </Select>
+</FormControl>
 
           {localStatus === "RECEIVED" && (
             <Box mt={2}>

@@ -118,9 +118,10 @@ public class UserServiceImpl implements UserService {
     public boolean deleteUser(Long id) {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
-            return true;
+            return true; 
         }
-        return false;
+        return false; 
+
     }
 
 
@@ -183,6 +184,8 @@ public class UserServiceImpl implements UserService {
 	public String forgotPassword(String email) {
 		User user = userRepository.findByEmail(email)
 				.orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+		System.out.println(user);
+
 		String userEmail = user.getEmail();
 		if (userEmail != null && !userEmail.isEmpty()) {
 			otpService.generateAndSendOtp(userEmail);

@@ -1,12 +1,14 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:8080/api", 
+  baseURL: "https://logistics-v1.onrender.com/api", 
+  // baseURL: "http://localhost:8080/api", 
 });
+
 
 // Add JWT token to all outgoing requests (if token exists)
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -14,5 +16,6 @@ API.interceptors.request.use((config) => {
 }, (error) => {
   return Promise.reject(error);
 });
+
 
 export default API;

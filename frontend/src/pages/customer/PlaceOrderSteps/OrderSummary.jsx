@@ -1,21 +1,30 @@
-import React from "react";
+
+import React, { useEffect, useState, useRef } from "react";
 import { Box, Typography, Button, Paper } from "@mui/material";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable"; // correct import for latest version
+import { useNavigate } from "react-router-dom";
 
 const OrderSummary = ({ order, onFinish }) => {
+  const navigate = useNavigate();
+  const [countdown, setCountdown] = useState(10);
+  const timerRef = useRef(null);
+
+  // Generate PDF invoice
   const generateInvoice = () => {
     const doc = new jsPDF();
 
-    doc.text("RouteRover Logistics - Invoice", 14, 20);
-    doc.autoTable({
+    doc.text("MoveBiz Logistics - Invoice", 14, 20);
+    autoTable(doc, {
+
       startY: 30,
       head: [["Field", "Value"]],
       body: [
         ["Order ID", order.id],
         ["Shipment ID", order.shipmentId],
         ["Route ID", order.routeId],
-        ["Cost", `₹${order.cost}`],
+        ["Cost", "\u20B9 " + order.cost],
+
         ["Status", order.status],
         ["Pickup Date", order.scheduledPickupDate],
         ["Notes", order.notes || "-"],
@@ -24,6 +33,24 @@ const OrderSummary = ({ order, onFinish }) => {
 
     doc.save(`Invoice_Order_${order.id}.pdf`);
   };
+
+
+  // Timer for auto redirect
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          navigate("/customer/dashboard"); 
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timerRef.current);
+  }, [navigate]);
+
 
   return (
     <Paper sx={{ p: 4 }}>
@@ -50,11 +77,30 @@ const OrderSummary = ({ order, onFinish }) => {
         <strong>Pickup:</strong> {order.scheduledPickupDate}
       </Typography>
 
+
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        display="block"
+        sx={{ mt: 1 }}
+      >
+        Redirecting to dashboard in {countdown} seconds...
+      </Typography>
+
+
       <Box mt={3}>
         <Button variant="outlined" onClick={generateInvoice} sx={{ mr: 2 }}>
           Download Invoice
         </Button>
-        <Button variant="contained" onClick={onFinish}>
+
+        <Button
+          variant="contained"
+          onClick={() => {
+            clearInterval(timerRef.current);
+            onFinish();
+          }}
+        >
+
           Place Another Order
         </Button>
       </Box>

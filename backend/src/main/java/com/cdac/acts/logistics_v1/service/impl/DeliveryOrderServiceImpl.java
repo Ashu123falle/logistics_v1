@@ -1,7 +1,9 @@
 package com.cdac.acts.logistics_v1.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +13,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cdac.acts.logistics_v1.dto.DeliveryOrderRequestDTO;
 import com.cdac.acts.logistics_v1.dto.DeliveryOrderResponseDTO;
+import com.cdac.acts.logistics_v1.dto.InvoiceResponseDTO;
 import com.cdac.acts.logistics_v1.enums.DeliveryStatus;
 import com.cdac.acts.logistics_v1.exception.ResourceNotFoundException;
 import com.cdac.acts.logistics_v1.model.Customer;
 import com.cdac.acts.logistics_v1.model.DeliveryOrder;
 import com.cdac.acts.logistics_v1.model.Driver;
+import com.cdac.acts.logistics_v1.model.Payment;
 import com.cdac.acts.logistics_v1.model.Route;
 import com.cdac.acts.logistics_v1.model.Shipment;
+import com.cdac.acts.logistics_v1.repository.CustomerRepository;
 import com.cdac.acts.logistics_v1.repository.DeliveryOrderRepository;
 import com.cdac.acts.logistics_v1.repository.DriverRepository;
+import com.cdac.acts.logistics_v1.repository.PaymentRepository;
 import com.cdac.acts.logistics_v1.repository.RouteRepository;
 import com.cdac.acts.logistics_v1.repository.ShipmentRepository;
 import com.cdac.acts.logistics_v1.service.DeliveryOrderService;
@@ -34,8 +40,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     private final ShipmentRepository shipmentRepository;
     private final RouteRepository routeRepository;
     private final DriverRepository driverRepository;
-    
-    
+    private final PaymentRepository paymentRepository;
+    private final CustomerRepository customerRepository;
+
     @Autowired
     private EmailService emailService;
     
@@ -46,61 +53,99 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
             DeliveryOrderRepository deliveryOrderRepository,
             ShipmentRepository shipmentRepository,
             RouteRepository routeRepository,
-            DriverRepository driverRepository
+            DriverRepository driverRepository,
+            PaymentRepository paymentRepository,
+            CustomerRepository customerRepository
     ) {
         this.deliveryOrderRepository = deliveryOrderRepository;
         this.shipmentRepository = shipmentRepository;
         this.routeRepository = routeRepository;
         this.driverRepository = driverRepository;
+        this.paymentRepository = paymentRepository;
+        this.customerRepository = customerRepository;
     }
 
-    
-    private void sendOrderConfirmationEmail(DeliveryOrder order) {
-        Customer customer = order.getShipment().getCustomer();
-        String to = customer.getCompanyEmail();
-        String subject = "Order Confirmation - Order ID: " + order.getId();
+ private void sendOrderConfirmationEmail(DeliveryOrder order) {
+    Customer customer = order.getShipment().getCustomer();
+    String to = customer.getCompanyEmail();
+    String subject = "Your MoveBiz Order Confirmation - Order #" + order.getId() + "\n\n";
 
-        String text = "Dear " + customer.getContactPersonName() + ",\n\n"
-            + "Your order has been successfully placed. Please find the details below:\n\n"
-            + "Order ID       : " + order.getId() + "\n"
-            + "Status         : " + order.getStatus().name() + "\n"
-            + "Pickup Date    : " + order.getScheduledPickupDate() + "\n"
-            + "Driver Name    : " + order.getAssignedDriver().getFirstName() + " "+order.getAssignedDriver().getLastName()+"\n"
-            + "Contact Number : " + order.getAssignedDriver().getPhoneNumber() + "\n"
-            + "Vehicle Number : " + order.getAssignedDriver().getCurrentVehicle().getRegistrationNumber() + "\n"
-            + "Cost           : ₹" + order.getCost() + "\n\n"
-            + "Thank you for choosing MoveBiz.\n\n"
-            + "Best regards,\n"
-            + "Team MoveBiz";
-
-        emailService.sendSimpleEmail(to, subject, text);
+    String driverDetails;
+    if (order.getAssignedDriver() != null) {
+        driverDetails =
+            "Driver Name    : " + order.getAssignedDriver().getFirstName() + " " + order.getAssignedDriver().getLastName() + "\n" +
+            "Contact Number : " + order.getAssignedDriver().getPhoneNumber() + "\n" +
+            "Vehicle Number : " + order.getAssignedDriver().getCurrentVehicle().getRegistrationNumber() + "\n";
+    } else {
+        driverDetails = "Driver Details : A driver will be assigned to your order shortly, and you will receive their details once confirmed.\n";
     }
 
-    
+    String text =
+        "Dear " + customer.getContactPersonName() + ",\n\n" +
+        "We’re happy to let you know that your order has been successfully placed with MoveBiz.\n" +
+        "Here are the details of your order:\n\n" +
+        "------------------------------------------------------------\n" +
+        "Order ID       : " + order.getId() + "\n" +
+        "Status         : " + order.getStatus().name() + "\n" +
+        "Pickup Date    : " + order.getScheduledPickupDate() + "\n" +
+        driverDetails +
+        "Cost           : ₹" + order.getCost() + "\n" +
+        "------------------------------------------------------------\n\n" +
+        "You can track the status of your order anytime by logging into your MoveBiz account.\n\n" +
+        "Thank you for choosing MoveBiz for your logistics needs.\n" +
+        "We look forward to serving you again!\n\n" +
+        "Best regards,\n" +
+        "Team MoveBiz\n" +
+        "support@movebiz.com | +91-XXXXXXXXXX";
+
+    emailService.sendSimpleEmail(to, subject, text);
+}
+
+
     @Override
     public DeliveryOrderResponseDTO createOrder(DeliveryOrderRequestDTO request) {
+
+        // Fetch shipment
         Shipment shipment = shipmentRepository.findById(request.getShipmentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found with id: " + request.getShipmentId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Shipment not found with id: " + request.getShipmentId()
+                ));
 
+        // Fetch route
         Route route = routeRepository.findById(request.getRouteId())
-                .orElseThrow(() -> new ResourceNotFoundException("Route not found with id: " + request.getRouteId()));
-
-        Driver driver = driverRepository.findById(request.getDriverId())
-                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + request.getDriverId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Route not found with id: " + request.getRouteId()
+                ));
 
         DeliveryOrder order = DeliveryOrder.builder()
                 .shipment(shipment)
                 .route(route)
-                .assignedDriver(driver)
+                .placedBy(shipment.getCustomer()) 
                 .cost(request.getCost())
-                .status(DeliveryStatus.CONFIRMED)
+                .status(DeliveryStatus.valueOf(request.getStatus().toUpperCase()))
                 .scheduledPickupDate(request.getScheduledPickupDate())
+                .scheduledDeliveryDate(request.getScheduledDeliveredDate())
                 .notes(request.getNotes())
                 .createdAt(LocalDateTime.now())
                 .build();
+
+        if (request.getPaymentId() != null) {
+              Optional<Payment> pay =  paymentRepository.findById(request.getPaymentId());
+              if (pay.isPresent()) {
+                  order.setPayment(pay.get());
+              } 
+        }
+
         order = deliveryOrderRepository.save(order);
+
+        if (order.getPayment() != null) {
+            order.getPayment().setDeliveryOrder(order);
+            paymentRepository.save(order.getPayment());
+        }
+
         sendOrderConfirmationEmail(order);
-        return mapToResponse(deliveryOrderRepository.save(order));
+
+        return mapToResponse(order);
     }
     
     
@@ -164,13 +209,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         order.setScheduledPickupDate(request.getScheduledPickupDate());
         order.setScheduledDeliveryDate(request.getScheduledDeliveredDate());
         order.setNotes(request.getNotes());
-        
 
         return mapToResponse(deliveryOrderRepository.save(order));
     }
-    
-   
-
 
     @Override
     public void deleteOrder(Long id) {
@@ -196,27 +237,71 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     public DeliveryOrderResponseDTO updateStatus(Long id, String status) {
         DeliveryOrder order = deliveryOrderRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-        System.out.println(order);
-        order.setStatus(DeliveryStatus.valueOf(status.toUpperCase())); // assumes you use an enum
+        order.setStatus(DeliveryStatus.valueOf(status.toUpperCase()));
         deliveryOrderRepository.save(order);
-
         return mapToResponse(order);
     }
 
-    
+
     private DeliveryOrderResponseDTO mapToResponse(DeliveryOrder order) {
         return new DeliveryOrderResponseDTO(
                 order.getId(),
                 order.getShipment().getId(),
                 order.getRoute().getId(),
-                order.getAssignedDriver().getUserId(),
+                order.getAssignedDriver() != null ? order.getAssignedDriver().getUserId() : 001,
                 order.getPlacedBy().getUserId(),
+                order.getPayment() != null ? order.getPayment().getId() : null,
                 order.getCost(),
                 order.getStatus().name(),
                 order.getScheduledPickupDate(),
                 order.getScheduledDeliveryDate(),
                 order.getNotes()
-                
         );
     }
+    public List<InvoiceResponseDTO> getInvoicesByCustomerId(Long customerId) {
+        // Get all delivery orders for this customer
+        List<DeliveryOrder> orders = deliveryOrderRepository.findByPlacedBy_UserId(customerId);
+
+        // Fetch customer once
+        Customer customer = customerRepository.findById(customerId)
+            .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+
+        List<InvoiceResponseDTO> invoices = new ArrayList<>();
+      
+            List<Shipment>shipments = shipmentRepository.findByCustomer_UserId(customerId);
+
+            for (DeliveryOrder order : orders) {
+                // Fetch shipments related to this delivery order
+                
+                // Fetch route by route id from order
+                Route route = null;
+                if (order.getRoute() != null) {
+                    route = routeRepository.findById(order.getRoute().getId())
+                        .orElse(null);
+                }
+
+                InvoiceResponseDTO invoice = InvoiceResponseDTO.builder()
+                    .deliveryOrderId(order.getId())
+                    .cost(order.getCost())
+                    .status(order.getStatus())
+                    .scheduledPickupDate(order.getScheduledPickupDate())
+                    .scheduledDeliveryDate(order.getScheduledDeliveryDate())
+                    .notes(order.getNotes())
+                    .shipment(shipments)
+                    .route(route)
+                    .customer(customer)
+                    .build();
+
+                invoices.add(invoice);
+            }
+
+            return invoices;
+        }
+
+	
+
+	
+        
+       
+
 }

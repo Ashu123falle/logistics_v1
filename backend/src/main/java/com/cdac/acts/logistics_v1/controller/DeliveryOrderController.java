@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/delivery-orders")
 @RequiredArgsConstructor
-//@CrossOrigin(origins = "*", allowedHeaders = "*") // TEMP for debug
 public class DeliveryOrderController {
 
     private final DeliveryOrderService deliveryOrderService;
@@ -39,19 +38,14 @@ public class DeliveryOrderController {
 
 	
 
-    /**
-     * Create Delivery Order
-     */
     @PreAuthorize("hasRole('CUSTOMER')")
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<DeliveryOrderResponseDTO> createOrder(@RequestBody DeliveryOrderRequestDTO request) {
+        System.out.println("Authenticated user called this API!");
         DeliveryOrderResponseDTO order = deliveryOrderService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(order); // ✅ 201 Created
     }
 
-    /**
-     * Get Delivery Order by ID
-     */
     @PreAuthorize("hasRole('ADMIN') or hasRole('DRIVER')")
     @GetMapping("/{id}")
     public ResponseEntity<DeliveryOrderResponseDTO> getOrderById(@PathVariable Long id) {
@@ -77,11 +71,9 @@ public class DeliveryOrderController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP. Please try again.");
     }
 
-    /**
-     * Get All Orders (with pagination)
-     */
+    
     @PreAuthorize("hasRole('ADMIN') or hasRole('DRIVER') or hasRole('CUSTOMER')")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<DeliveryOrderResponseDTO>> getAllOrders(
             @RequestParam(defaultValue = "1") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -90,9 +82,7 @@ public class DeliveryOrderController {
         return ResponseEntity.ok(orders);
     }
 
-    /**
-     * Update Delivery Order
-     */
+    
     @PreAuthorize("hasRole('ADMIN') or hasRole('DRIVER')")
     @PutMapping("/{id}")
     public ResponseEntity<DeliveryOrderResponseDTO> updateOrder(
@@ -103,9 +93,7 @@ public class DeliveryOrderController {
         return ResponseEntity.ok(updatedOrder); // ✅ 200 OK
     }
 
-    /**
-     * Delete Delivery Order
-     */
+    
     @PreAuthorize("hasRole('ADMIN') or hasRole('CUSTOMER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
@@ -113,9 +101,7 @@ public class DeliveryOrderController {
         return ResponseEntity.noContent().build(); // ✅ 204 No Content
     }
 
-    /**
-     * Get Orders by Shipment ID
-     */
+  
     @PreAuthorize("hasRole('ADMIN') or hasRole('CUSTOMER')")
     @GetMapping("/shipment/{shipmentId}")
     public ResponseEntity<List<DeliveryOrderResponseDTO>> getOrdersByShipmentId(@PathVariable Long shipmentId) {
@@ -123,9 +109,7 @@ public class DeliveryOrderController {
         return ResponseEntity.ok(orders);
     }
 
-    /**
-     * Get Orders by Driver ID
-     */
+    
     @PreAuthorize("hasRole('ADMIN') or hasRole('DRIVER')")
     @GetMapping("/driver/{driverId}")
     public ResponseEntity<List<DeliveryOrderResponseDTO>> getOrdersByDriverId(@PathVariable Long driverId) {

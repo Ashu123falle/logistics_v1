@@ -15,6 +15,7 @@ public class RazorpayConfig {
     @Value("${razorpay.secret}")
     private String secret;
 
+    // Bean for Razorpay client to handle payment operations
     @Bean
      RazorpayClient razorpayClient() throws RazorpayException {
         return new RazorpayClient(key, secret);

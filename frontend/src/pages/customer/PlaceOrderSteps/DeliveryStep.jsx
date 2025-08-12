@@ -7,20 +7,44 @@ import {
   Paper,
   Box,
 } from "@mui/material";
-
-const DeliveryStep = ({ data, setData, shipmentId, routeId, onPaymentSuccess,routeData }) => {
+import API  from "../../../services/api"; 
+import { useAuth } from "../../../context/AuthContext"
+const DeliveryStep = ({
+  data,
+  setData,
+  shipmentId,
+  shipmentData,
+  routeId,
+  onPaymentSuccess,
+  routeData,
+}) => {
+  const { auth } = useAuth();
   const [paymentProcessing, setPaymentProcessing] = useState(false);
-  const token = localStorage.getItem("token");
-
-  console.log(routeData);
-  
-
+  const [customer,setCustomer] = useState(null);
  useEffect(() => {
   if (routeData?.distance) {
-    const calculatedCost = Math.round(routeData.distance * 100);
-    setData((prev) => ({ ...prev, cost: calculatedCost }));
+    // Base rate per km
+    const baseRate = 100;
+
+    // GST rate in %
+    const gstRate = 18;
+
+    // Optional fixed handling fee
+    const handlingFee = 50;
+
+    // Base cost = distance × rate
+    const baseCost = routeData.distance * baseRate;
+
+    // GST amount
+    const gstAmount = (baseCost * gstRate) / 100;
+
+    // Final cost
+    const totalCost = Math.round(baseCost + gstAmount + handlingFee);
+
+    setData((prev) => ({ ...prev, cost: totalCost }));
   }
 }, [routeData?.distance, setData]);
+
 
   const handleChange = (e) => {
     setData((prev) => ({
@@ -29,95 +53,128 @@ const DeliveryStep = ({ data, setData, shipmentId, routeId, onPaymentSuccess,rou
     }));
   };
 
-  const handlePayment = async () => {
-    setPaymentProcessing(true);
 
-    try {
-      const res = await fetch("http://localhost:8080/api/payment/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-        body: JSON.stringify({ amount: data.cost }),
-      });
+ const handlePayment = async () => {
+  setPaymentProcessing(true);
+  let paymentId = null;
 
-      const order = await res.json();
+  try {
+    const token = localStorage.getItem("token");
 
-      const options = {
-        key: "rzp_test_KcgwyYJnxfRQKf",
-        amount: order.amount,
-        currency: "INR",
-        name: "RouteRover Logistics",
-        description: "Shipment Payment",
-        order_id: order.razorpayOrderId,
-        handler: async function (response) {
-          const verifyRes = await fetch("http://localhost:8080/api/payment/verify", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + token,
-            },
-            body: JSON.stringify({
-              razorpayOrderId: order.razorpayOrderId,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            }),
+    // 1. Fetch customer details
+    const { data: fetchedCustomer } = await API.get(`/customer/${auth.userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setCustomer(fetchedCustomer);
+
+    // 2. Create Razorpay order
+    const { data: order } = await API.post("/payment/create", {
+      amount: data.cost,
+    });
+
+    // 3. Razorpay config
+    const options = {
+      key: "rzp_test_KcgwyYJnxfRQKf",
+      amount: order.amount,
+      currency: "INR",
+      name: "MoveBiz Logistics",
+      description: "Shipment Payment",
+      order_id: order.razorpayOrderId,
+
+      handler: async function (response) {
+        try {
+          // 4. Verify payment
+          const { data: result } = await API.post("/payment/verify", {
+            razorpay_order_id: order.razorpayOrderId,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            customerId: auth.userId,
           });
 
-          const result = await verifyRes.text();
-          if (verifyRes.ok && result.includes("verified")) {
-            const deliveryOrderPayload = {
-              shipmentId,
-              routeId,
-              driverId: null,
-              cost: data.cost,
-              status: "PAID",
-              scheduledPickupDate: data.scheduledPickupDate,
-              notes: data.notes || "",
-            };
+          if (result.includes("verified")) {
+            alert("✅ Verification successful! Payment received.");
 
-            const orderRes = await fetch("http://localhost:8080/api/orders", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-              },
-              body: JSON.stringify(deliveryOrderPayload),
-            });
-
-            const orderResult = await orderRes.json();
-            onPaymentSuccess(orderResult);
+            const idMatch = result.match(/id:\s*(\d+)/);
+            paymentId = idMatch ? idMatch[1] : null;
           } else {
             alert("❌ Payment verification failed: " + result);
           }
-        },
-        prefill: {
-          name: "Customer",
-          email: "customer@example.com",
-          contact: "9999999999",
-        },
-        theme: { color: "#0d6efd" },
-      };
+        } catch (verifyErr) {
+          alert("❌ Error during payment verification: " + verifyErr.message);
+        } finally {
+          // 5. Create delivery order regardless of payment verification
+          await createDeliveryOrder(paymentId);
+        }
+      },
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } catch (err) {
-      alert("❌ Payment Error: " + err.message);
-    } finally {
-      setPaymentProcessing(false);
-    }
+      prefill: {
+        name: fetchedCustomer?.userId || "Customer",
+        email: fetchedCustomer?.email || "test@example.com",
+        contact: fetchedCustomer?.phoneNumber || "9999999999",
+      },
+      theme: { color: "#0db40dff" },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  } catch (err) {
+    alert("❌ Payment Error: " + err.message);
+
+    // 6. Create delivery order anyway (no payment)
+    await createDeliveryOrder(null);
+  } finally {
+    setPaymentProcessing(false);
+  }
+};
+const createDeliveryOrder = async (paymentId) => {
+  const deliveryOrderPayload = {
+    shipmentId,
+    routeId,
+    driverId: null,
+    paymentId, // either actual ID or null
+    cost: data.cost,
+    status: "PENDING",
+    scheduledPickupDate: data.scheduledPickupDate,
+    scheduledDeliveredDate: data.scheduledDeliveredDate,
+    notes: data.notes || "",
   };
+
+  try {
+    const { data: orderResult } = await API.post("/delivery-orders/create", deliveryOrderPayload);
+    console.log("📦 Delivery Order Created:", orderResult);
+
+    // Optional: update payment with delivery order
+    // if (paymentId) {
+    //   await API.put(`/payment/${auth.userId}`, {
+    //     deliveryOrderId: orderResult.id,
+    //   });
+    // }
+
+    onPaymentSuccess(orderResult);
+  } catch (err) {
+    alert("❌ Failed to create delivery order: " + err.message);
+  }
+};
+
+
+
 
   return (
     <Paper elevation={3} sx={{ p: 3 }}>
-      <Typography variant="h5" gutterBottom>Payment Summary</Typography>
+      <Typography variant="h5" gutterBottom>
+        Payment Summary
+      </Typography>
 
-      <Box sx={{ mb: 3, p: 2, backgroundColor: "#f9f9f9", borderRadius: 2 }}>
+      <Box
+        sx={{ mb: 3, p: 2, backgroundColor: "#f9f9f9", borderRadius: 2 }}
+      >
         <Typography variant="subtitle1">Total Cost:</Typography>
-        <Typography variant="h6" color="primary">₹ {data.cost || 0}</Typography>
+        <Typography variant="h6" color="primary">
+          ₹ {data.cost || 0}
+        </Typography>
       </Box>
-
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <TextField
@@ -142,7 +199,7 @@ const DeliveryStep = ({ data, setData, shipmentId, routeId, onPaymentSuccess,rou
         <Grid item xs={12}>
           <Button
             variant="contained"
-            color="primary"
+            color="success"
             fullWidth
             onClick={handlePayment}
             disabled={paymentProcessing}

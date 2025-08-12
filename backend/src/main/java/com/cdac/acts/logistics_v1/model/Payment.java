@@ -3,10 +3,13 @@ package com.cdac.acts.logistics_v1.model;
 import java.time.LocalDateTime;
 
 import com.cdac.acts.logistics_v1.enums.PaymentStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,7 +47,8 @@ public class Payment {
 
     private LocalDateTime paymentDate;
 
-    @OneToOne
+    @JsonBackReference
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "delivery_order_id")
     private DeliveryOrder deliveryOrder;
 

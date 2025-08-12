@@ -16,38 +16,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
 
 const initialDocs = [
-  {
-    id: 1,
-    name: "DOT operating authority (MC)",
-    date: "01/02/2025",
-    size: "3 MB",
-    status: "Pending",
-    img: "/images/dot.png",
-  },
-  {
-    id: 2,
-    name: "Driver's license",
-    date: "01/02/2025",
-    size: "1 MB",
-    status: "Reviewed",
-    img: "/images/license.png",
-  },
-  {
-    id: 3,
-    name: "Vehicle registration",
-    date: "01/02/2025",
-    size: "3 MB",
-    status: "Reviewed",
-    img: "/images/vehicle.png",
-  },
-  {
-    id: 4,
-    name: "Livestock transport permit",
-    date: "01/02/2025",
-    size: "3 MB",
-    status: "Expired",
-    img: "/images/permit.png",
-  },
+  { id: 1, name: "DOT operating authority (MC)", date: "01/02/2025", size: "3 MB", status: "Pending", img: "/images/dot.png" },
+  { id: 2, name: "Driver's license", date: "01/02/2025", size: "1 MB", status: "Reviewed", img: "/images/license.png" },
+  { id: 3, name: "Vehicle registration", date: "01/02/2025", size: "3 MB", status: "Reviewed", img: "/images/vehicle.png" },
+  { id: 4, name: "Livestock transport permit", date: "01/02/2025", size: "3 MB", status: "Expired", img: "/images/permit.png" },
 ];
 
 export default function CompliancePage() {
@@ -55,20 +27,15 @@ export default function CompliancePage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
 
-  // Filter Menu State
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
-  const handleFilterClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
+  const handleFilterClick = (event) => setAnchorEl(event.currentTarget);
   const handleFilterSelect = (status) => {
     setFilterStatus(status);
     setAnchorEl(null);
   };
 
-  // Filtered Documents based on search and status filter
   const filteredDocs = docs.filter((doc) => {
     const matchesSearch = doc.name.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = filterStatus === "All" || doc.status === filterStatus;
@@ -76,21 +43,26 @@ export default function CompliancePage() {
   });
 
   return (
-    <Box sx={{ p: 3, bgcolor: "#f9fafb", minHeight: "100vh" }}>
+    <Box sx={{ p: { xs: 2, sm: 3 }, bgcolor: "#f9fafb", minHeight: "100vh" }}>
       {/* Top Section */}
       <Box
         sx={{
           bgcolor: "#fff",
-          p: 2,
+          p: { xs: 2, sm: 2 },
           borderRadius: 3,
           mb: 3,
           display: "flex",
+          flexDirection: { xs: "column", sm: "row" }, 
+          gap: { xs: 1.5, sm: 0 },
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: { xs: "flex-start", sm: "center" },
           boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
         }}
       >
-        <Typography variant="body1" sx={{ fontWeight: "600", color: "#111827" }}>
+        <Typography
+          variant="body1"
+          sx={{ fontWeight: "600", color: "#111827", display: "flex", alignItems: "center" }}
+        >
           Total storage{" "}
           <Chip
             label={`${filteredDocs.length} documents • 291 MB`}
@@ -104,7 +76,7 @@ export default function CompliancePage() {
         </Typography>
 
         {/* Search + Filter */}
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1, width: { xs: "100%", sm: "auto" } }}>
           <TextField
             size="small"
             placeholder="Search documents"
@@ -121,7 +93,8 @@ export default function CompliancePage() {
               bgcolor: "#f3f4f6",
               borderRadius: 3,
               "& fieldset": { border: "none" },
-              width: 220,
+              flex: { xs: 1, sm: "unset" }, 
+              minWidth: { sm: 220 },
             }}
           />
           <IconButton
@@ -161,11 +134,10 @@ export default function CompliancePage() {
                   flexDirection: "column",
                   alignItems: "center",
                   transition: "all 0.2s ease",
-                  height: 250,
+                  height: { xs: "auto", sm: 250 }, 
                   "&:hover": { boxShadow: "0px 4px 10px rgba(0,0,0,0.12)" },
                 }}
               >
-                {/* Document Image */}
                 <Box
                   component="img"
                   src={doc.img}
@@ -173,13 +145,12 @@ export default function CompliancePage() {
                   sx={{
                     width: "100%",
                     borderRadius: 2,
-                    height: 120,
+                    height: { xs: 160, sm: 120 },
                     objectFit: "cover",
                     mb: 1,
                   }}
                 />
 
-                {/* Document Name */}
                 <Typography
                   variant="subtitle2"
                   sx={{
@@ -197,7 +168,6 @@ export default function CompliancePage() {
                   {doc.name}
                 </Typography>
 
-                {/* Date & Size */}
                 <Typography
                   variant="caption"
                   display="block"
@@ -211,7 +181,6 @@ export default function CompliancePage() {
                   {doc.date} • {doc.size}
                 </Typography>
 
-                {/* Status or Button */}
                 <Box sx={{ mt: "auto", width: "100%" }}>
                   {doc.status === "Pending" ? (
                     <Button

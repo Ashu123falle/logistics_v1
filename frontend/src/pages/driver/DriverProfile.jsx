@@ -49,7 +49,8 @@ const DriverProfile = () => {
         <Grid container spacing={2} alignItems="center">
           <Grid item>
             <Avatar sx={{ width: 80, height: 80 }}>
-              {driver?.firstName?.charAt(0)}
+              {`${driver?.firstName?.[0] || ""}${driver?.lastName?.[0] || ""}`.toUpperCase()}
+
             </Avatar>
           </Grid>
           <Grid item xs>

@@ -248,7 +248,7 @@ intervalRef.current = setInterval(sendLocation, 900000); // Every 15 mins
 
         {/* Original backend route */}
         {routePoints.length > 0 && (
-          <Polyline positions={routePoints} color="blue" />
+          <Polyline positions={routePoints} color="black" />
         )}
 
         {/* Driver marker */}

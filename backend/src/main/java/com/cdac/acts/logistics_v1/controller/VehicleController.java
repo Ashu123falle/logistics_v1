@@ -17,13 +17,14 @@ public class VehicleController {
 
     private final VehicleService vehicleService;
 
+    // Create a new vehicle
     @PostMapping
     public ResponseEntity<VehicleResponseDTO> createVehicle(@RequestBody VehicleRequestDTO vehicleDTO) {
         VehicleResponseDTO createdVehicle = vehicleService.createVehicle(vehicleDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdVehicle);
     }
 
-    
+    // Update an existing vehicle by ID
     @PutMapping("/{id}")
     public ResponseEntity<VehicleResponseDTO> updateVehicle(
             @PathVariable Long id,
@@ -33,40 +34,24 @@ public class VehicleController {
         return ResponseEntity.ok(updatedVehicle);
     }
 
-    
+    // Delete a vehicle by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
         vehicleService.deleteVehicle(id);
         return ResponseEntity.noContent().build(); 
     }
 
-    
+    // Get a vehicle by ID
     @GetMapping("/{id}")
     public ResponseEntity<VehicleResponseDTO> getVehicleById(@PathVariable Long id) {
         VehicleResponseDTO vehicle = vehicleService.getVehicleById(id);
         return ResponseEntity.ok(vehicle);
     }
 
-    /**
-     * Get all vehicles (with optional pagination)
-     */
-//    @GetMapping
-//    public ResponseEntity<List<VehicleResponseDTO>> getAllVehicles(
-//            @RequestParam(defaultValue = "1") int pageNo,
-//            @RequestParam(defaultValue = "10") int pageSize) {
-//
-//        List<VehicleResponseDTO> vehicles = vehicleService.getAllVehicles(Math.max(pageNo - 1, 0), pageSize);
-//        return ResponseEntity.ok(vehicles);
-//    }
-    
-    
-    // Get all vehicle (without optional pagination)
+    // Get all vehicles
     @GetMapping
     public ResponseEntity<List<VehicleResponseDTO>> getAllVehicles() {
-
         List<VehicleResponseDTO> vehicles = vehicleService.getAllVehicles();
         return ResponseEntity.ok(vehicles);
     }
-    
-    
 }

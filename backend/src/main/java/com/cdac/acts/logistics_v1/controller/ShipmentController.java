@@ -31,14 +31,15 @@ public class ShipmentController {
     private ShipmentService shipmentService;
 
 
-//    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','DRIVER')")
+    // Create a new shipment
     @PostMapping
     public ResponseEntity<ShipmentResponseDTO> createShipment(@RequestBody ShipmentRequestDTO request) {
-    	System.out.println("in add method !!!!");
+        System.out.println("in add method !!!!");
         ShipmentResponseDTO shipment = shipmentService.createShipment(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(shipment);
     }
 
+    // Get shipment by ID
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'DRIVER')")
     @GetMapping("/{id}")
     public ResponseEntity<ShipmentResponseDTO> getShipmentById(@PathVariable Long id) {
@@ -46,6 +47,7 @@ public class ShipmentController {
         return shipment != null ? ResponseEntity.ok(shipment) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    // Get all shipments (paginated)
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<ShipmentResponseDTO>> getAllShipments(
@@ -55,6 +57,7 @@ public class ShipmentController {
         return ResponseEntity.ok(shipments);
     }
 
+    // Update an existing shipment
     @PreAuthorize("hasRole('CUSTOMER')")
     @PutMapping("/{id}")
     public ResponseEntity<ShipmentResponseDTO> updateShipment(
@@ -64,6 +67,7 @@ public class ShipmentController {
         return updatedShipment != null ? ResponseEntity.ok(updatedShipment) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    // Delete shipment by ID
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteShipment(@PathVariable Long id) {
@@ -71,6 +75,7 @@ public class ShipmentController {
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    // Get shipments by type (paginated)
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER', 'DRIVER')")
     @GetMapping("/type/{type}")
     public ResponseEntity<List<ShipmentResponseDTO>> getShipmentsByType(
@@ -81,11 +86,12 @@ public class ShipmentController {
         return ResponseEntity.ok(shipments);
     }
 
+    // Upload images for a shipment
     @PreAuthorize("hasRole('DRIVER')")
-//    @PostMapping("/upload-images")
     @PostMapping(value = "/upload-images", consumes = "multipart/form-data")
-    public ResponseEntity<ImageResponseDTO> upload( @RequestPart("images") List<MultipartFile> images, @RequestParam Long shipmentId) {
-    	ImageResponseDTO imageUrl = shipmentService.uploadImages(shipmentId, images);
+    public ResponseEntity<ImageResponseDTO> upload(@RequestPart("images") List<MultipartFile> images,
+                                                   @RequestParam Long shipmentId) {
+        ImageResponseDTO imageUrl = shipmentService.uploadImages(shipmentId, images);
         return ResponseEntity.ok(imageUrl);
     }
 }

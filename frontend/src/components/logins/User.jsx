@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Grid,
   Box,
@@ -17,7 +18,6 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import './User.css';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext'; 
 import { jwtDecode } from "jwt-decode"; 
 import Navbar from '../Navbar';
@@ -38,8 +38,9 @@ const User = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:8080/api/auth/login", {
-      // const response = await axios.post("https://logistics-v1.onrender.com/api/auth/login", {
+      // const response = await axios.post("http://localhost:8080/api/auth/login", {
+      const response = await axios.post("https://logistics-v1.onrender.com/api/auth/login", {
+      // const response = await axios.post("logisticsv1-production.up.railway.app/api/auth/login", {
 
         username: emailOrPhone,
         password,
@@ -50,6 +51,8 @@ const User = () => {
 
       const storage = rememberMe ? localStorage : sessionStorage;
       storage.setItem("token", token);
+      // Store the username in local storage so the sidebar can access it
+      storage.setItem("username", emailOrPhone);
 
 
       setAuth({
@@ -148,9 +151,9 @@ const User = () => {
                 }
                 label="Remember me"
               />
-              <Link href="#" variant="body2" underline="hover">
-                Forgot password?
-              </Link>
+               <Link component={RouterLink} to="/forgot-password" variant="body2" underline="hover">
+                  Forgot password?
+                </Link>
             </Grid>
 
             <Button type="submit" fullWidth variant="contained" color="success" sx={{ mb: 2 }}>

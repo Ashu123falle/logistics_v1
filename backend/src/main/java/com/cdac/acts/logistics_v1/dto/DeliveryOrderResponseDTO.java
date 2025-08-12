@@ -13,6 +13,7 @@ public class DeliveryOrderResponseDTO {
     private Long routeId;
     private Long driverId;
     private Long customerId;
+    private Long paymentId;
     private Double cost;
     private String status;
     private LocalDateTime scheduledPickupDate;

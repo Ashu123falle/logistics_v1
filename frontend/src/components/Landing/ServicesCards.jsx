@@ -5,33 +5,33 @@ export default function ServicesCards() {
   const cards = [
     {
       title: "Express Parcel Service",
-      img: "https://via.placeholder.com/400x250",
-      description: "Dummy text for Express Parcel Service card."
+      img: "http://localhost:5173/images/Expressdelivery.jpg",
+      description: "Our express parcel service offers reliable and rapid delivery for your time-sensitive shipments. We ensure your packages reach their destination safely and on schedule, providing real-time tracking every step of the way."
     },
     {
       title: "Warehousing",
-      img: "https://via.placeholder.com/400x250",
-      description: "Dummy text for Warehousing card."
+      img: "http://localhost:5173/images/Warehousing.jpg",
+      description: "Leverage our state-of-the-art warehousing solutions for efficient inventory management. We provide secure storage, expert handling, and streamlined fulfillment services to optimize your supply chain operations."
     },
     {
       title: "Part Truckload Freight (PTL)",
-      img: "https://via.placeholder.com/400x250",
-      description: "Dummy text for PTL card."
+      img: "http://localhost:5173/images/partturk.png",
+      description: "For shipments that don't fill an entire truck, our PTL service is the perfect cost-effective solution. We consolidate your freight with other shipments to reduce costs without compromising on delivery timelines or safety."
     },
     {
       title: "Full Truckload Freight (FTL)",
-      img: "https://via.placeholder.com/400x250",
-      description: "Dummy text for FTL card."
+      img: "http://localhost:5173/images/Fulltrack.png",
+      description: "When you need a dedicated truck for your large-volume shipments, our FTL service provides a seamless and exclusive transport solution. Your goods are the sole cargo, ensuring fast, direct, and secure delivery."
     },
     {
       title: "Cross Border Shipping",
-      img: "https://via.placeholder.com/400x250",
-      description: "Dummy text for Cross Border card."
+      img: "http://localhost:5173/images/crossborder.png",
+      description: "Expand your reach with our comprehensive cross-border shipping services. We navigate customs, regulations, and logistics to ensure your international shipments are delivered smoothly and efficiently, opening up new markets for your business."
     },
     {
       title: "Data Intelligence",
-      img: "https://via.placeholder.com/400x250",
-      description: "Dummy text for Data Intelligence card."
+      img: "http://localhost:5173/images/dataintelligence.png",
+      description: "Our data intelligence platform provides deep insights into your logistics operations. By analyzing shipping data, we help you identify trends, optimize routes, and make smarter business decisions to enhance efficiency and profitability."
     }
   ];
 
@@ -58,8 +58,8 @@ export default function ServicesCards() {
                 boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
                 display: "flex",
                 flexDirection: "column",
-                height: "100%", // fill the grid cell height
-                minHeight: 320 // fixed minimum height for uniformity
+                height: "100%", 
+                minHeight: 320 
               }}
             >
               <CardMedia
@@ -68,12 +68,12 @@ export default function ServicesCards() {
                 image={card.img}
                 alt={card.title}
                 sx={{
-                  objectFit: "cover" // keeps image consistent
+                  objectFit: "cover" 
                 }}
               />
               <CardContent
                 sx={{
-                  flexGrow: 1 // fills remaining space
+                  flexGrow: 1 
                 }}
               >
                 <Typography variant="h6" fontWeight="bold" gutterBottom>

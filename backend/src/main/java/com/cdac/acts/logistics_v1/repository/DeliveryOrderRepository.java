@@ -14,7 +14,7 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
 
     List<DeliveryOrder> findByShipmentId(Long shipmentId);
     List<DeliveryOrder> findByAssignedDriverUserId(Long userId);
-
+    List<DeliveryOrder> findByPlacedBy_UserId(Long userId); 
     Long countByPlacedBy_UserId(Long userId); 
 
     @Query("SELECT SUM(o.cost) FROM DeliveryOrder o WHERE o.placedBy.userId = :userId")
